@@ -8,7 +8,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.black,
   },
   itemContainer: {
-    flex: 1,
+    height: Metrics.height,
     width: Metrics.screenWidth,
   },
   touchContainer: {
