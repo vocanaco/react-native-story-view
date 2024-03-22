@@ -20,7 +20,7 @@ const useDraggableGesture = ({
   isKeyboardVisible,
 }: DraggableGestureProps) => {
   const { height, width } = useWindowDimensions();
-  const snapPoint: number = Metrics.screenHeight / 2;
+  const snapPoint: number = Metrics.height / 8;
   const scrollDragPoint: number = Metrics.screenHeight / 6;
   const translateX = useSharedValue<number>(0);
   const translateY = useSharedValue<number>(0);
@@ -42,27 +42,36 @@ const useDraggableGesture = ({
         scale.value = snapPoint / event.translationY;
       }
     },
-    onCancel: () => {
-      isLongPressed.value = false;
+    onCancel: event => {
       isDragged.value = false;
+      isLongPressed.value = false;
+      if (event.translationY > snapPoint) {
+        scale.value = 0;
+        isCompleted.value = true;
+      } else {
+        scale.value = 1;
+        translateX.value = 0;
+        translateY.value = 0;
+      }
     },
     onEnd: event => {
       isLongPressed.value = false;
       isDragged.value = false;
-      if (event.translationY < snapPoint) {
-        translateX.value = 0;
-        translateY.value = 0;
-        return;
-      }
-      scale.value = withTiming(
-        0,
-        {
+      if (event.translationY > snapPoint) {
+        scale.value = withTiming(
+          0,
+          {
+            duration: 300,
+          },
+          () => {
+            isCompleted.value = true;
+          }
+        );
+      } else {
+        translateY.value = withTiming(0, {
           duration: 300,
-        },
-        () => {
-          isCompleted.value = true;
-        }
-      );
+        });
+      }
     },
   });
 
