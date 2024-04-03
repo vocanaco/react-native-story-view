@@ -7,8 +7,12 @@ const styles = StyleSheet.create({
     paddingTop: moderateScale(40),
     backgroundColor: Colors.black,
   },
-  itemContainer: {
+  rootViewStyle: {
     flex: 1,
+    backgroundColor: Colors.transparent,
+  },
+  itemContainer: {
+    height: Metrics.height,
     width: Metrics.screenWidth,
   },
   touchContainer: {
@@ -16,7 +20,7 @@ const styles = StyleSheet.create({
   },
   list: {
     flex: 1,
-    backgroundColor: Colors.black,
+    backgroundColor: Colors.transparent,
   },
   loaderStyle: {
     flex: 1,

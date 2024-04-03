@@ -5,12 +5,20 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { Modal } from 'react-native';
+import { Modal, View } from 'react-native';
+import {
+  GestureHandlerRootView,
+  PanGestureHandler,
+} from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { Metrics } from '../../theme';
 import { Footer } from '../Footer';
-import { Indicator, ProfileHeader, StoryContainer } from '../StoryView';
-import type { StoryRef } from '../StoryView/types';
+import {
+  Indicator,
+  ProfileHeader,
+  StoryContainer,
+  StoryRef,
+} from '../StoryView';
 import { useMultiStoryContainer } from './hooks';
 import styles from './styles';
 import {
@@ -38,7 +46,6 @@ const MultiStoryListItem = forwardRef<ListItemRef, MultiStoryListItemProps>(
       onComplete,
       viewedStories,
       isTransitionActive,
-      gestureHandler,
       ...props
     }: MultiStoryListItemProps,
     ref
@@ -67,7 +74,7 @@ const MultiStoryListItem = forwardRef<ListItemRef, MultiStoryListItemProps>(
     }, [index, scrollX.value]);
 
     return (
-      <Animated.View key={item.id} style={styles.itemContainer}>
+      <View key={item.id} style={styles.itemContainer}>
         {storyIndex === index || isTransitionActive ? (
           <Animated.View style={animationStyle}>
             <StoryContainer
@@ -95,13 +102,12 @@ const MultiStoryListItem = forwardRef<ListItemRef, MultiStoryListItemProps>(
               {...props}
               index={index}
               userStoryIndex={storyIndex}
-              gestureHandler={gestureHandler}
             />
           </Animated.View>
         ) : (
           props?.renderIndicatorComponent?.() ?? <Indicator />
         )}
-      </Animated.View>
+      </View>
     );
   }
 );
@@ -136,6 +142,7 @@ const MultiStoryContainer = ({
     listStyle,
     onScroll,
     scrollX,
+    listAnimatedStyle,
   } = useMultiStoryContainer(
     flatListRef,
     props,
@@ -178,6 +185,7 @@ const MultiStoryContainer = ({
       onRequestClose={() => onComplete?.()}>
       <Animated.FlatList
         horizontal
+        bounces={false}
         style={listStyle}
         pagingEnabled
         initialNumToRender={2}
@@ -204,22 +212,29 @@ const MultiStoryContainer = ({
         }}
         extraData={storyIndex}
         renderItem={({ item, index }: ListItemProps) => (
-          <MultiStoryListItem
-            ref={(elements: any) => (itemsRef.current[index] = elements)}
-            {...{
-              item,
-              index,
-              nextStory,
-              previousStory,
-              storyIndex,
-              onComplete,
-              viewedStories,
-              scrollX,
-              isTransitionActive,
-            }}
-            gestureHandler={gestureHandler}
-            {...props}
-          />
+          <GestureHandlerRootView style={styles.rootViewStyle}>
+            <PanGestureHandler
+              activateAfterLongPress={Metrics.isIOS ? 150 : 0}
+              onGestureEvent={gestureHandler}>
+              <Animated.View style={listAnimatedStyle}>
+                <MultiStoryListItem
+                  ref={(elements: any) => (itemsRef.current[index] = elements)}
+                  {...{
+                    item,
+                    index,
+                    nextStory,
+                    previousStory,
+                    storyIndex,
+                    onComplete,
+                    viewedStories,
+                    scrollX,
+                    isTransitionActive,
+                  }}
+                  {...props}
+                />
+              </Animated.View>
+            </PanGestureHandler>
+          </GestureHandlerRootView>
         )}
       />
     </Modal>

@@ -33,10 +33,10 @@ const useStoryContainer = (
   const [isPause, setPause] = useState(true);
   const [visibleElements, setVisibleElements] = useState(true);
   const appState = useRef(AppState.currentState);
-  const storyMode: StoryMode =
-    props?.userStoryIndex !== undefined
-      ? StoryMode.MultiStory
-      : StoryMode.SingleStory;
+  // Prop extended is used to determine the story mode, that is being used internally in StoryContainer
+  const storyMode: StoryMode = props?.extended
+    ? StoryMode.SingleStory
+    : StoryMode.MultiStory;
   const storyCount = props?.stories?.length ?? 0;
   const [videoDuration, setVideoDuration] = useState<number[]>(
     Array(storyCount).fill(0)

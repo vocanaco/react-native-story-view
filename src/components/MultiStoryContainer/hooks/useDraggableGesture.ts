@@ -18,9 +18,10 @@ const useDraggableGesture = ({
   onScrollEndDrag,
   handleLongPress,
   isKeyboardVisible,
+  isSwipeDown,
 }: DraggableGestureProps) => {
   const { height, width } = useWindowDimensions();
-  const snapPoint: number = Metrics.screenHeight / 2;
+  const snapPoint: number = Metrics.height / 8;
   const scrollDragPoint: number = Metrics.screenHeight / 6;
   const translateX = useSharedValue<number>(0);
   const translateY = useSharedValue<number>(0);
@@ -29,42 +30,77 @@ const useDraggableGesture = ({
   const isDragged = useSharedValue<boolean | undefined>(undefined);
   const isLongPressed = useSharedValue<boolean | undefined>(undefined);
 
-  const gestureHandler = useAnimatedGestureHandler({
-    onActive: event => {
-      isLongPressed.value = true;
-      if (event.velocityY === 0) return;
-      translateX.value = 0;
-      translateY.value = event.translationY;
-      if (event.translationY > scrollDragPoint) {
-        isDragged.value = true;
-      }
-      if (event.translationY > snapPoint) {
-        scale.value = snapPoint / event.translationY;
-      }
-    },
-    onCancel: () => {
-      isLongPressed.value = false;
-      isDragged.value = false;
-    },
-    onEnd: event => {
-      isLongPressed.value = false;
-      isDragged.value = false;
-      if (event.translationY < snapPoint) {
-        translateX.value = 0;
-        translateY.value = 0;
-        return;
-      }
-      scale.value = withTiming(
-        0,
-        {
-          duration: 300,
-        },
-        () => {
-          isCompleted.value = true;
+  const gestureHandler = useAnimatedGestureHandler(
+    {
+      onStart: () => {
+        // onStart will call when gesture is started
+        // Note: here we set isLongPressed to true because we are using it to handle visibility of some elements
+        isLongPressed.value = true;
+      },
+      onActive: event => {
+        isLongPressed.value = true;
+        isSwipeDown.value = true;
+
+        if (event.velocityY === 0) return;
+        if (event.translationY <= 0) {
+          translateY.value = 0;
+          return;
         }
-      );
+        translateX.value = 0;
+        translateY.value = event.translationY;
+
+        // When user swipe down to scroll point then set isDragged to true
+        if (event.translationY > scrollDragPoint) {
+          isDragged.value = true;
+        }
+
+        // When user swipe down to snap point then scale the view or reset to 1
+        if (event.translationY > snapPoint) {
+          scale.value = snapPoint / event.translationY;
+        } else {
+          scale.value = 1;
+        }
+      },
+      onCancel: event => {
+        isSwipeDown.value = false;
+        isDragged.value = false;
+        isLongPressed.value = false;
+        if (event.translationY > snapPoint) {
+          scale.value = 0;
+          isCompleted.value = true;
+        } else {
+          scale.value = 1;
+          translateX.value = 0;
+          translateY.value = 0;
+        }
+      },
+      onEnd: event => {
+        isLongPressed.value = false;
+        isSwipeDown.value = false;
+        isDragged.value = false;
+        if (event.translationY > snapPoint) {
+          scale.value = withTiming(
+            0,
+            {
+              duration: 300,
+            },
+            () => {
+              isCompleted.value = true;
+            }
+          );
+        } else {
+          translateY.value = withTiming(0, {
+            duration: 300,
+          });
+        }
+      },
+      onFinish: () => {
+        // Finish will call when gesture is completed or released
+        isLongPressed.value = false;
+      },
     },
-  });
+    []
+  );
 
   useAnimatedReaction(
     () => isCompleted.value,
@@ -90,7 +126,14 @@ const useDraggableGesture = ({
 
   const handleVisibility = () => {
     if (isLongPressed.value === undefined) return;
-    handleLongPress?.(isLongPressed.value);
+    // Delaying the long press event to handle visibility of some elements
+    // Note: 200ms delay is used to identify long press event
+    setTimeout(
+      () => {
+        handleLongPress?.(isLongPressed.value ?? false);
+      },
+      isLongPressed.value ? 200 : 0
+    );
   };
 
   useAnimatedReaction(
@@ -101,24 +144,28 @@ const useDraggableGesture = ({
     }
   );
 
-  const listAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { scale: scale.value },
-      { translateX: translateX.value },
-      { translateY: translateY.value },
-    ],
-    backgroundColor: !isDragged.value
-      ? backgroundColor ?? Colors.black
-      : Colors.transparent,
-  }));
+  const listAnimatedStyle = useAnimatedStyle(
+    () => ({
+      transform: [
+        { scale: scale.value },
+        { translateX: translateX.value },
+        { translateY: translateY.value },
+      ],
+      backgroundColor: !isDragged.value
+        ? backgroundColor ?? Colors.black
+        : Colors.transparent,
+    }),
+    [backgroundColor, scale, translateX, translateY, isDragged]
+  );
 
-  const listStyle = StyleSheet.flatten([styles.list, listAnimatedStyle]);
+  const listStyle = StyleSheet.flatten([styles.list]);
   const rootStyle = { height, width, backgroundColor: Colors.transparent };
 
   return {
     listStyle,
     rootStyle,
     gestureHandler,
+    listAnimatedStyle,
   };
 };
 

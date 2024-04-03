@@ -1,6 +1,5 @@
 import type { ViewToken } from 'react-native';
 import type { SharedValue } from 'react-native-reanimated';
-import type { GestureHandlerEvent } from 'react-native-reanimated/lib/typescript/reanimated2/hook';
 import type { StoriesType, StoryContainerProps } from '../StoryView/types';
 
 export enum TransitionMode {
@@ -36,7 +35,6 @@ export interface MultiStoryListItemProps
   transitionMode?: TransitionMode;
   scrollX: ScrollValue;
   isTransitionActive: boolean;
-  gestureHandler?: (e: GestureHandlerEvent<any>) => void;
 }
 
 export interface ViewConfig {
@@ -62,6 +60,8 @@ export interface DraggableGestureProps {
   onScrollEndDrag: () => void;
   handleLongPress: (visibility: boolean) => void;
   isKeyboardVisible: boolean;
+  isSwipeDown: SharedValue<boolean>;
 }
 
 export type ScrollValue = SharedValue<number>;
+export type SwipeDownValue = SharedValue<boolean>;
