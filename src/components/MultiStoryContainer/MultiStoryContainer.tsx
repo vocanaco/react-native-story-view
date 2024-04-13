@@ -1,17 +1,16 @@
-import React, {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { Modal, View } from 'react-native';
 import {
+  GestureDetector,
   GestureHandlerRootView,
-  PanGestureHandler,
 } from 'react-native-gesture-handler';
-import Animated, { useAnimatedStyle } from 'react-native-reanimated';
-import { Metrics } from '../../theme';
+import Animated, {
+  runOnJS,
+  useAnimatedReaction,
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated';
+import { Colors, Metrics } from '../../theme';
 import { Footer } from '../Footer';
 import {
   Indicator,
@@ -19,13 +18,13 @@ import {
   StoryContainer,
   StoryRef,
 } from '../StoryView';
-import { useMultiStoryContainer } from './hooks';
+import { useMultiStoryContainer, useDraggableGesture } from './hooks';
 import styles from './styles';
 import {
   ListItemProps,
-  ListItemRef,
   MultiStoryContainerProps,
   MultiStoryListItemProps,
+  SwipeDownValue,
   TransitionMode,
 } from './types';
 import {
@@ -34,33 +33,63 @@ import {
   scaleTransition,
 } from './utils/StoryTransitions';
 
-const MultiStoryListItem = forwardRef<ListItemRef, MultiStoryListItemProps>(
-  (
-    {
-      item,
-      index,
-      scrollX,
-      nextStory,
-      previousStory,
-      storyIndex,
-      onComplete,
-      viewedStories,
-      isTransitionActive,
-      ...props
-    }: MultiStoryListItemProps,
-    ref
-  ) => {
+const MultiStoryListItem = memo(
+  ({
+    item,
+    index,
+    scrollX,
+    storyIndex,
+    onComplete,
+    viewedStories,
+    isTransitionActive,
+    isCurrentStory,
+    storyLength,
+    flatListRef,
+    ...props
+  }: MultiStoryListItemProps) => {
     const storyRef = useRef<StoryRef>(null);
+    const isSwipeDown: SwipeDownValue = useSharedValue(false);
+
     const storyInitialIndex: number = viewedStories?.[index]?.findIndex(
       (val: boolean) => !val
     );
 
-    useImperativeHandle(ref, () => ({
-      onScrollBegin: () => storyRef?.current?.pause(true),
-      onScrollEnd: () => storyRef?.current?.pause(false),
-      handleLongPress: (visibility: boolean) =>
-        storyRef?.current?.handleLongPress(visibility),
-    }));
+    const onStopSCroll = (value: boolean) =>
+      flatListRef?.current?.setNativeProps({
+        scrollEnabled: !value,
+      });
+
+    useAnimatedReaction(
+      () => isSwipeDown?.value,
+      (value: boolean) => {
+        runOnJS(onStopSCroll)(value);
+      }
+    );
+
+    const nextStory = () => {
+      if (storyIndex + 1 === storyLength) {
+        onComplete?.();
+        return;
+      }
+      if (storyIndex >= storyLength - 1) return;
+      flatListRef.current?.scrollToIndex({
+        index: storyIndex + 1,
+        animated: true,
+      });
+    };
+
+    const previousStory = () => {
+      if (storyIndex === 0) return;
+      flatListRef.current?.scrollToIndex({
+        index: storyIndex - 1,
+        animated: true,
+      });
+    };
+
+    const onScrollBegin = () => storyRef?.current?.pause(true);
+    const onScrollEnd = () => storyRef?.current?.pause(false);
+    const handleLongPress = (visibility: boolean) =>
+      storyRef?.current?.handleLongPress(visibility);
 
     const animationStyle = useAnimatedStyle(() => {
       switch (props.transitionMode) {
@@ -73,43 +102,71 @@ const MultiStoryListItem = forwardRef<ListItemRef, MultiStoryListItemProps>(
       }
     }, [index, scrollX.value]);
 
+    const { gestureHandler, listAnimatedStyle } = useDraggableGesture({
+      backgroundColor: Colors.black,
+      onComplete,
+      onScrollBeginDrag: onScrollBegin,
+      onScrollEndDrag: onScrollEnd,
+      handleLongPress: handleLongPress,
+      isSwipeDown,
+    });
+
     return (
-      <View key={item.id} style={styles.itemContainer}>
-        {storyIndex === index || isTransitionActive ? (
-          <Animated.View style={animationStyle}>
-            <StoryContainer
-              visible={true}
-              extended={false}
-              key={index + item?.id}
-              ref={storyRef}
-              userStories={item}
-              nextStory={nextStory}
-              previousStory={previousStory}
-              stories={item.stories}
-              progressIndex={storyInitialIndex < 0 ? 0 : storyInitialIndex}
-              maxVideoDuration={15}
-              renderHeaderComponent={() => (
-                <ProfileHeader
-                  userImage={{ uri: item.profile ?? '' }}
-                  userName={item.username}
-                  userMessage={item.title}
-                  onClosePress={() => {
-                    onComplete?.();
-                  }}
-                />
+      <GestureHandlerRootView style={styles.rootViewStyle}>
+        <GestureDetector gesture={gestureHandler}>
+          <Animated.View style={listAnimatedStyle}>
+            <View key={item.id} style={styles.itemContainer}>
+              {isCurrentStory || isTransitionActive ? (
+                <Animated.View style={animationStyle}>
+                  {[
+                    index - 2,
+                    index - 1,
+                    index,
+                    index + 1,
+                    index + 2,
+                    index + 3,
+                  ].includes(storyIndex) && (
+                    <StoryContainer
+                      visible={true}
+                      extended={false}
+                      key={index + item?.id}
+                      ref={storyRef}
+                      userStories={item}
+                      nextStory={nextStory}
+                      previousStory={previousStory}
+                      stories={item.stories}
+                      progressIndex={
+                        storyInitialIndex < 0 ? 0 : storyInitialIndex
+                      }
+                      maxVideoDuration={15}
+                      renderHeaderComponent={() => (
+                        <ProfileHeader
+                          userImage={{ uri: item.profile ?? '' }}
+                          userName={item.username}
+                          userMessage={item.title}
+                          onClosePress={() => {
+                            onComplete?.();
+                          }}
+                        />
+                      )}
+                      renderFooterComponent={() => <Footer />}
+                      {...props}
+                      index={index}
+                      userStoryIndex={storyIndex}
+                    />
+                  )}
+                </Animated.View>
+              ) : (
+                props?.renderIndicatorComponent?.() ?? <Indicator />
               )}
-              renderFooterComponent={() => <Footer />}
-              {...props}
-              index={index}
-              userStoryIndex={storyIndex}
-            />
+            </View>
           </Animated.View>
-        ) : (
-          props?.renderIndicatorComponent?.() ?? <Indicator />
-        )}
-      </View>
+        </GestureDetector>
+        {/* </PanGestureHandler> */}
+      </GestureHandlerRootView>
     );
   }
+  // )
 );
 
 const MultiStoryContainer = ({
@@ -121,62 +178,17 @@ const MultiStoryContainer = ({
   ...props
 }: MultiStoryContainerProps) => {
   const flatListRef = useRef<any>(null);
-  const itemsRef = useRef<ListItemRef[]>([]);
+
   const [isTransitionActive, setIsTransitionActive] = useState<boolean>(false);
 
-  useEffect(() => {
-    itemsRef.current = itemsRef.current.slice(0, stories.length);
-  }, [itemsRef, stories]);
-
-  const onScrollBeginDrag = () => itemsRef.current[storyIndex]?.onScrollBegin();
-  const onScrollEndDrag = () => itemsRef.current[storyIndex]?.onScrollEnd();
-  const handleLongPress = (visiblity: boolean) => {
-    itemsRef.current[storyIndex]?.handleLongPress(visiblity);
-  };
-
-  const {
-    storyIndex,
-    onViewRef,
-    viewabilityConfig,
-    gestureHandler,
-    listStyle,
-    onScroll,
-    scrollX,
-    listAnimatedStyle,
-  } = useMultiStoryContainer(
-    flatListRef,
-    props,
-    onScrollBeginDrag,
-    onScrollEndDrag,
-    handleLongPress,
-    onComplete
-  );
+  const { storyIndex, onViewRef, viewabilityConfig, onScroll, scrollX } =
+    useMultiStoryContainer(flatListRef, props);
 
   useEffect(() => {
     onUserStoryIndexChange?.(storyIndex);
   }, [onUserStoryIndexChange, storyIndex]);
 
   if (!visible) return null;
-
-  const nextStory = () => {
-    if (storyIndex + 1 === stories.length) {
-      onComplete?.();
-      return;
-    }
-    if (storyIndex >= stories.length - 1) return;
-    flatListRef.current?.scrollToIndex({
-      index: storyIndex + 1,
-      animated: true,
-    });
-  };
-
-  const previousStory = () => {
-    if (storyIndex === 0) return;
-    flatListRef.current?.scrollToIndex({
-      index: storyIndex - 1,
-      animated: true,
-    });
-  };
 
   return (
     <Modal
@@ -186,14 +198,15 @@ const MultiStoryContainer = ({
       <Animated.FlatList
         horizontal
         bounces={false}
-        style={listStyle}
+        style={styles.list}
+        windowSize={10}
+        snapToAlignment={'start'}
         pagingEnabled
         initialNumToRender={2}
+        maxToRenderPerBatch={10}
         data={stories}
         ref={flatListRef}
         onScroll={onScroll}
-        onScrollBeginDrag={onScrollBeginDrag}
-        onScrollEndDrag={onScrollEndDrag}
         scrollEventThrottle={16}
         initialScrollIndex={storyIndex}
         keyboardShouldPersistTaps="handled"
@@ -211,31 +224,25 @@ const MultiStoryContainer = ({
           width: Metrics.screenWidth * stories.length,
         }}
         extraData={storyIndex}
-        renderItem={({ item, index }: ListItemProps) => (
-          <GestureHandlerRootView style={styles.rootViewStyle}>
-            <PanGestureHandler
-              activateAfterLongPress={Metrics.isIOS ? 150 : 0}
-              onGestureEvent={gestureHandler}>
-              <Animated.View style={listAnimatedStyle}>
-                <MultiStoryListItem
-                  ref={(elements: any) => (itemsRef.current[index] = elements)}
-                  {...{
-                    item,
-                    index,
-                    nextStory,
-                    previousStory,
-                    storyIndex,
-                    onComplete,
-                    viewedStories,
-                    scrollX,
-                    isTransitionActive,
-                  }}
-                  {...props}
-                />
-              </Animated.View>
-            </PanGestureHandler>
-          </GestureHandlerRootView>
-        )}
+        renderItem={({ item, index }: ListItemProps) => {
+          return (
+            <MultiStoryListItem
+              {...{
+                item,
+                index,
+                storyIndex,
+                onComplete,
+                viewedStories,
+                scrollX,
+                isTransitionActive,
+                storyLength: stories.length,
+                flatListRef: flatListRef,
+                isCurrentStory: storyIndex === index,
+              }}
+              {...props}
+            />
+          );
+        }}
       />
     </Modal>
   );

@@ -35,6 +35,9 @@ export interface MultiStoryListItemProps
   transitionMode?: TransitionMode;
   scrollX: ScrollValue;
   isTransitionActive: boolean;
+  isCurrentStory: boolean;
+  storyLength: number;
+  flatListRef: any;
 }
 
 export interface ViewConfig {
@@ -59,7 +62,6 @@ export interface DraggableGestureProps {
   onScrollBeginDrag: () => void;
   onScrollEndDrag: () => void;
   handleLongPress: (visibility: boolean) => void;
-  isKeyboardVisible: boolean;
   isSwipeDown: SharedValue<boolean>;
 }
 

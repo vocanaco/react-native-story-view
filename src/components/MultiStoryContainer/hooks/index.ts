@@ -1,3 +1,4 @@
 import useMultiStoryContainer from './useMultiStoryContainer';
+import useDraggableGesture from './useDraggableGesture';
 
-export { useMultiStoryContainer };
+export { useMultiStoryContainer, useDraggableGesture };

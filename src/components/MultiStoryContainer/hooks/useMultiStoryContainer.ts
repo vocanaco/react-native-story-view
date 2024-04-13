@@ -12,15 +12,10 @@ import type {
   SwipeDownValue,
   ViewConfig,
 } from '../types';
-import useDraggableGesture from './useDraggableGesture';
 
 const useMultiStoryContainer = (
   flatListRef: any,
-  { userStoryIndex, backgroundColor }: Partial<MultiStoryContainerProps>,
-  onScrollBeginDrag: () => void,
-  onScrollEndDrag: () => void,
-  handleLongPress: (visibility: boolean) => void,
-  onComplete?: () => void
+  { userStoryIndex }: Partial<MultiStoryContainerProps>
 ) => {
   const [storyIndex, setStoryIndex] = useState(userStoryIndex ?? 0);
   const scrollX: ScrollValue = useSharedValue(0);
@@ -31,7 +26,7 @@ const useMultiStoryContainer = (
   });
   const isKeyboardVisible = useKeyboardListener();
   const onScroll = useAnimatedScrollHandler(event => {
-    scrollX.value = event.contentOffset.x;
+    scrollX.value = event?.contentOffset?.x ?? 0;
   });
 
   useEffect(() => {
@@ -63,28 +58,13 @@ const useMultiStoryContainer = (
     }
   );
 
-  const { listStyle, rootStyle, gestureHandler, listAnimatedStyle } =
-    useDraggableGesture({
-      backgroundColor,
-      onComplete,
-      onScrollBeginDrag,
-      onScrollEndDrag,
-      handleLongPress,
-      isKeyboardVisible,
-      isSwipeDown,
-    });
-
   return {
     scrollX,
     onViewRef,
     viewabilityConfig,
-    listStyle,
-    rootStyle,
     storyIndex,
-    gestureHandler,
     setStoryIndex,
     onScroll,
-    listAnimatedStyle,
   };
 };
 
