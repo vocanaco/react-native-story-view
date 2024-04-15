@@ -1,8 +1,6 @@
 import Indicator from './Indicator';
 import ProfileHeader from './ProfileHeader';
-import { default as StoryContainer } from './Story';
-import { default as StoryViewContainer } from './StoryContainer';
-
+import { default as StoryContainer } from './StoryContainer';
 export type {
   CallbackProps,
   StoriesType,
@@ -12,4 +10,4 @@ export type {
   StoryViewProps,
   UserProps,
 } from './types';
-export { Indicator, ProfileHeader, StoryContainer, StoryViewContainer };
+export { Indicator, ProfileHeader, StoryContainer };

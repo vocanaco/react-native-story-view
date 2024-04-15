@@ -1,6 +1,6 @@
 {
   "name": "react-native-story-view",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "React Native component to provide status/stories feature.",
   "main": "lib/index",
   "types": "lib/index.d.ts",
@@ -58,7 +58,9 @@
     "react-native-gesture-handler": ">=2.13.4",
     "react-native-reanimated": ">=3.5.4",
     "react-native-video": ">=5",
-    "react-native-video-cache-control": "*"
+    "react-native-video-cache-control": "*",
+    "@shopify/flash-list": ">=1.5.0",
+    "lodash": "*"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
@@ -68,6 +70,7 @@
     "@react-native-community/eslint-config": "^3.0.1",
     "@testing-library/react-native": "^9.0.0",
     "@types/jest": "^27.4.0",
+    "@types/lodash": "^4.17.0",
     "@types/react-native": "^0.66.15",
     "@types/react-native-video": "^5.0.13",
     "@types/react-test-renderer": "^17.0.1",
@@ -88,10 +91,13 @@
     "react-native-video": "^5",
     "react-native-video-cache-control": "^1.2.2",
     "react-test-renderer": "17.0.2",
-    "typescript": "4.7.4"
+    "typescript": "4.7.4",
+    "@shopify/flash-list": "^1.6.4",
+    "lodash": "^4.17.21"
   },
   "resolutions": {
-    "@types/react": "*"
+    "@types/react": "*",
+    "react-native-reanimated": ">=3.5.4"
   },
   "jest": {
     "preset": "react-native",

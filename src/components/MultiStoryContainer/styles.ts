@@ -7,9 +7,13 @@ const styles = StyleSheet.create({
     paddingTop: moderateScale(40),
     backgroundColor: Colors.black,
   },
-  itemContainer: {
+  rootViewStyle: {
     flex: 1,
-    width: Metrics.screenWidth,
+    backgroundColor: Colors.transparent,
+  },
+  itemContainer: {
+    height: Metrics.windowHeight,
+    width: Metrics.windowWidth,
   },
   touchContainer: {
     flex: 1,

@@ -26,9 +26,9 @@ $ yarn add react-native-story-view
 ##### 2. Install peer dependencies
 
 ```bash
-$ npm install react-native-video react-native-reanimated react-native-gesture-handler react-native-video-cache-control
+$ npm install react-native-video react-native-reanimated react-native-gesture-handler react-native-video-cache-control @shopify/flash-list lodash
 # --- or ---
-$ yarn add react-native-video react-native-reanimated react-native-gesture-handler react-native-video-cache-control
+$ yarn add react-native-video react-native-reanimated react-native-gesture-handler react-native-video-cache-control @shopify/flash-list lodash
 ```
 
 > Note: If you already have these libraries installed and at the latest version, you are done here!
@@ -96,7 +96,7 @@ jcenter() {
 }
 ```
 
-##### Know more about [react-native-video](https://www.npmjs.com/package/react-native-video), [react-native-reanimated](https://www.npmjs.com/package/react-native-reanimated), [react-native-gesture-handler](https://www.npmjs.com/package/react-native-gesture-handler) and [react-native-video-cache-control](https://www.npmjs.com/package/react-native-video-cache-control)
+##### Know more about [react-native-video](https://www.npmjs.com/package/react-native-video), [react-native-reanimated](https://www.npmjs.com/package/react-native-reanimated), [react-native-gesture-handler](https://www.npmjs.com/package/react-native-gesture-handler), [react-native-video-cache-control](https://www.npmjs.com/package/react-native-video-cache-control), [@shopify/flash-list](https://www.npmjs.com/package/@shopify/flash-list) and [lodash](https://www.npmjs.com/package/lodash)
 
 ---
 

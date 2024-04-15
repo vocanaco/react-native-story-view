@@ -1,8 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import {
-  useAnimatedScrollHandler,
-  useSharedValue,
-} from 'react-native-reanimated';
+import { useRef, useState } from 'react';
+import { useSharedValue } from 'react-native-reanimated';
 import { useKeyboardListener } from '../../../hooks';
 import type {
   MultiStoryContainerProps,
@@ -12,7 +9,7 @@ import type {
 import useDraggableGesture from './useDraggableGesture';
 
 const useMultiStoryContainer = (
-  flatListRef: any,
+  _flatListRef: any,
   { userStoryIndex, backgroundColor }: Partial<MultiStoryContainerProps>,
   onScrollBeginDrag: () => void,
   onScrollEndDrag: () => void,
@@ -26,13 +23,9 @@ const useMultiStoryContainer = (
     itemVisiblePercentThreshold: 70,
   });
   const isKeyboardVisible = useKeyboardListener();
-  const onScroll = useAnimatedScrollHandler(event => {
-    scrollX.value = event.contentOffset.x;
-  });
-
-  useEffect(() => {
-    flatListRef?.current?.setNativeProps({ scrollEnabled: !isKeyboardVisible });
-  }, [flatListRef, isKeyboardVisible]);
+  const onScroll = (event: any) => {
+    scrollX.value = event.nativeEvent.contentOffset.x;
+  };
 
   const onViewRef = useRef(({ viewableItems }: ViewConfig) => {
     const index = viewableItems?.[0]?.index;
@@ -47,14 +40,15 @@ const useMultiStoryContainer = (
     }
   });
 
-  const { listStyle, rootStyle, gestureHandler } = useDraggableGesture({
-    backgroundColor,
-    onComplete,
-    onScrollBeginDrag,
-    onScrollEndDrag,
-    handleLongPress,
-    isKeyboardVisible,
-  });
+  const { listStyle, rootStyle, gestureHandler, listAnimatedStyle } =
+    useDraggableGesture({
+      backgroundColor,
+      onComplete,
+      onScrollBeginDrag,
+      onScrollEndDrag,
+      handleLongPress,
+      isKeyboardVisible,
+    });
 
   return {
     scrollX,
@@ -66,6 +60,8 @@ const useMultiStoryContainer = (
     gestureHandler,
     setStoryIndex,
     onScroll,
+    listAnimatedStyle,
+    isKeyboardVisible,
   };
 };
 

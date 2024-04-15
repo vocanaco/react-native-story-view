@@ -9,6 +9,7 @@ import { MultiStoryContainer } from '../MultiStoryContainer';
 import { StoryAvatar } from '../StoryAvatar';
 import type { StoryType } from '../StoryView';
 import type { MultiStoryProps, MultiStoryRef } from './types';
+import { cloneDeep } from 'lodash';
 
 const MultiStory = forwardRef<MultiStoryRef, MultiStoryProps>(
   ({ stories, transitionMode, avatarProps, ...props }, ref) => {
@@ -68,7 +69,7 @@ const MultiStory = forwardRef<MultiStoryRef, MultiStoryProps>(
           <MultiStoryContainer
             visible={isStoryViewVisible}
             onComplete={_onClose}
-            viewedStories={[...viewedStories]}
+            viewedStories={cloneDeep(viewedStories)}
             onChangePosition={(progressIndex, storyIndex: any) => {
               viewedStories[storyIndex][progressIndex] = true;
               props?.onChangePosition?.(progressIndex, storyIndex);
