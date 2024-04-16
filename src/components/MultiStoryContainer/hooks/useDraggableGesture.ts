@@ -1,7 +1,7 @@
 import { StyleSheet, useWindowDimensions } from 'react-native';
+import { Gesture } from 'react-native-gesture-handler';
 import {
   runOnJS,
-  useAnimatedGestureHandler,
   useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
@@ -20,7 +20,7 @@ const useDraggableGesture = ({
   isKeyboardVisible,
 }: DraggableGestureProps) => {
   const { height, width } = useWindowDimensions();
-  const snapPoint: number = Metrics.screenHeight / 2;
+  const snapPoint: number = Metrics.screenHeight / 8;
   const scrollDragPoint: number = Metrics.screenHeight / 6;
   const translateX = useSharedValue<number>(0);
   const translateY = useSharedValue<number>(0);
@@ -29,42 +29,62 @@ const useDraggableGesture = ({
   const isDragged = useSharedValue<boolean | undefined>(undefined);
   const isLongPressed = useSharedValue<boolean | undefined>(undefined);
 
-  const gestureHandler = useAnimatedGestureHandler({
-    onActive: event => {
-      isLongPressed.value = true;
+  const panGesture = Gesture.Pan()
+    .activateAfterLongPress(200)
+    .onChange(event => {
       if (event.velocityY === 0) return;
-      translateX.value = 0;
-      translateY.value = event.translationY;
-      if (event.translationY > scrollDragPoint) {
-        isDragged.value = true;
-      }
-      if (event.translationY > snapPoint) {
-        scale.value = snapPoint / event.translationY;
-      }
-    },
-    onCancel: () => {
-      isLongPressed.value = false;
-      isDragged.value = false;
-    },
-    onEnd: event => {
-      isLongPressed.value = false;
-      isDragged.value = false;
-      if (event.translationY < snapPoint) {
-        translateX.value = 0;
+      if (event.translationY <= 0) {
         translateY.value = 0;
         return;
       }
-      scale.value = withTiming(
-        0,
-        {
+      isLongPressed.value = true;
+
+      translateX.value = 0;
+      translateY.value = event.translationY;
+
+      // When user swipe down to scroll point then set isDragged to true
+      if (event.translationY > scrollDragPoint) {
+        isDragged.value = true;
+      }
+
+      // When user swipe down to snap point then scale the view or reset to 1
+      if (event.translationY > snapPoint) {
+        scale.value = snapPoint / event.translationY;
+      } else {
+        scale.value = 1;
+      }
+    })
+    .onEnd(event => {
+      isLongPressed.value = false;
+      isDragged.value = false;
+      if (event.translationY > snapPoint) {
+        scale.value = withTiming(
+          0,
+          {
+            duration: 300,
+          },
+          () => {
+            isCompleted.value = true;
+          }
+        );
+      } else {
+        translateY.value = withTiming(0, {
           duration: 300,
-        },
-        () => {
-          isCompleted.value = true;
-        }
-      );
-    },
-  });
+        });
+      }
+    });
+
+  const longPressGesture = Gesture.LongPress()
+    .minDuration(200) // To disable the min duration
+    .maxDistance(10000) // To disable the max distance
+    .onStart(() => {
+      isLongPressed.value = true;
+    })
+    .onEnd(() => {
+      isLongPressed.value = false;
+    });
+
+  const gestureHandler = Gesture.Simultaneous(panGesture, longPressGesture);
 
   useAnimatedReaction(
     () => isCompleted.value,
@@ -112,13 +132,14 @@ const useDraggableGesture = ({
       : Colors.transparent,
   }));
 
-  const listStyle = StyleSheet.flatten([styles.list, listAnimatedStyle]);
+  const listStyle = StyleSheet.flatten([styles.list]);
   const rootStyle = { height, width, backgroundColor: Colors.transparent };
 
   return {
     listStyle,
     rootStyle,
     gestureHandler,
+    listAnimatedStyle,
   };
 };
 

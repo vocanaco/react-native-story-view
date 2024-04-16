@@ -10,7 +10,6 @@ import type {
   ViewProps,
   ViewStyle,
 } from 'react-native';
-import type { GestureHandlerEvent } from 'react-native-reanimated/lib/typescript/reanimated2/hook';
 import type {
   OnLoadData,
   OnProgressData,
@@ -128,6 +127,7 @@ export interface CallbackProps {
 }
 
 export interface StoryContainerProps extends CommonProps {
+  extended?: boolean;
   stories: StoryType[];
   userStories?: StoriesType;
   visible?: boolean | undefined;
@@ -162,7 +162,6 @@ export interface StoryContainerProps extends CommonProps {
   customViewStyle?: ViewStyle;
   headerStyle?: ViewStyle;
   footerStyle?: ViewStyle;
-  gestureHandler?: (e: GestureHandlerEvent<any>) => void;
 }
 
 export interface UserProps {
