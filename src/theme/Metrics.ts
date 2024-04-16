@@ -104,4 +104,6 @@ export const Metrics = {
   isIOS: Platform.OS === 'ios',
   keyboardVerticalOffset: Platform.OS === 'ios' ? 10 : 30,
   statusBarHeight: StatusBar.currentHeight,
+  windowHeight: Dimensions.get('window').height,
+  windowWidth: Dimensions.get('window').width,
 };

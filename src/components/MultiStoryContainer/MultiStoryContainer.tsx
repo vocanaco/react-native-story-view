@@ -1,11 +1,17 @@
+import { FlashList } from '@shopify/flash-list';
 import React, {
   forwardRef,
+  memo,
   useEffect,
   useImperativeHandle,
   useRef,
   useState,
 } from 'react';
-import { Modal } from 'react-native';
+import { Modal, View } from 'react-native';
+import {
+  GestureDetector,
+  GestureHandlerRootView,
+} from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { Metrics } from '../../theme';
 import { Footer } from '../Footer';
@@ -32,13 +38,12 @@ const MultiStoryListItem = forwardRef<ListItemRef, MultiStoryListItemProps>(
       item,
       index,
       scrollX,
-      nextStory,
-      previousStory,
       storyIndex,
       onComplete,
       viewedStories,
       isTransitionActive,
-      gestureHandler,
+      flatListRef,
+      storyLength,
       ...props
     }: MultiStoryListItemProps,
     ref
@@ -56,6 +61,9 @@ const MultiStoryListItem = forwardRef<ListItemRef, MultiStoryListItemProps>(
     }));
 
     const animationStyle = useAnimatedStyle(() => {
+      if (scrollX.value === 0) {
+        return defaultTransition();
+      }
       switch (props.transitionMode) {
         case TransitionMode.Cube:
           return cubeTransition(index, scrollX);
@@ -66,8 +74,28 @@ const MultiStoryListItem = forwardRef<ListItemRef, MultiStoryListItemProps>(
       }
     }, [index, scrollX.value]);
 
+    const nextStory = () => {
+      if (storyIndex + 1 === storyLength) {
+        onComplete?.();
+        return;
+      }
+      if (storyIndex >= storyLength - 1) return;
+      flatListRef.current?.scrollToIndex({
+        index: storyIndex + 1,
+        animated: true,
+      });
+    };
+
+    const previousStory = () => {
+      if (storyIndex === 0) return;
+      flatListRef.current?.scrollToIndex({
+        index: storyIndex - 1,
+        animated: true,
+      });
+    };
+
     return (
-      <Animated.View key={item.id} style={styles.itemContainer}>
+      <View key={item.id} style={styles.itemContainer}>
         {storyIndex === index || isTransitionActive ? (
           <Animated.View style={animationStyle}>
             <StoryContainer
@@ -95,13 +123,12 @@ const MultiStoryListItem = forwardRef<ListItemRef, MultiStoryListItemProps>(
               {...props}
               index={index}
               userStoryIndex={storyIndex}
-              gestureHandler={gestureHandler}
             />
           </Animated.View>
         ) : (
           props?.renderIndicatorComponent?.() ?? <Indicator />
         )}
-      </Animated.View>
+      </View>
     );
   }
 );
@@ -133,9 +160,10 @@ const MultiStoryContainer = ({
     onViewRef,
     viewabilityConfig,
     gestureHandler,
-    listStyle,
     onScroll,
     scrollX,
+    listAnimatedStyle,
+    isKeyboardVisible,
   } = useMultiStoryContainer(
     flatListRef,
     props,
@@ -151,79 +179,74 @@ const MultiStoryContainer = ({
 
   if (!visible) return null;
 
-  const nextStory = () => {
-    if (storyIndex + 1 === stories.length) {
-      onComplete?.();
-      return;
-    }
-    if (storyIndex >= stories.length - 1) return;
-    flatListRef.current?.scrollToIndex({
-      index: storyIndex + 1,
-      animated: true,
-    });
-  };
-
-  const previousStory = () => {
-    if (storyIndex === 0) return;
-    flatListRef.current?.scrollToIndex({
-      index: storyIndex - 1,
-      animated: true,
-    });
-  };
-
   return (
     <Modal
       visible={visible}
       transparent={true}
       onRequestClose={() => onComplete?.()}>
-      <Animated.FlatList
-        horizontal
-        style={listStyle}
-        pagingEnabled
-        initialNumToRender={2}
-        data={stories}
-        ref={flatListRef}
-        onScroll={onScroll}
-        onScrollBeginDrag={onScrollBeginDrag}
-        onScrollEndDrag={onScrollEndDrag}
-        scrollEventThrottle={16}
-        initialScrollIndex={storyIndex}
-        keyboardShouldPersistTaps="handled"
-        getItemLayout={(_, index) => ({
-          length: Metrics.screenWidth,
-          offset: Metrics.screenWidth * index,
-          index,
-        })}
-        onLayout={() => setIsTransitionActive(true)}
-        onViewableItemsChanged={onViewRef.current}
-        viewabilityConfig={viewabilityConfig.current}
-        decelerationRate={Metrics.isIOS ? 0.99 : 0.92}
-        keyExtractor={item => item?.title + item?.id?.toString()}
-        contentContainerStyle={{
-          width: Metrics.screenWidth * stories.length,
-        }}
-        extraData={storyIndex}
-        renderItem={({ item, index }: ListItemProps) => (
-          <MultiStoryListItem
-            ref={(elements: any) => (itemsRef.current[index] = elements)}
-            {...{
-              item,
-              index,
-              nextStory,
-              previousStory,
-              storyIndex,
-              onComplete,
-              viewedStories,
-              scrollX,
-              isTransitionActive,
-            }}
-            gestureHandler={gestureHandler}
-            {...props}
-          />
-        )}
-      />
+      <GestureHandlerRootView style={styles.rootViewStyle}>
+        <GestureDetector gesture={gestureHandler}>
+          <Animated.View
+            style={{
+              height: Metrics.windowHeight,
+              width: Metrics.windowWidth,
+            }}>
+            <FlashList
+              horizontal
+              pagingEnabled
+              bounces={false}
+              data={stories}
+              scrollEnabled={!isKeyboardVisible}
+              ref={flatListRef}
+              onScroll={onScroll}
+              onScrollBeginDrag={onScrollBeginDrag}
+              onScrollEndDrag={onScrollEndDrag}
+              scrollEventThrottle={16}
+              initialScrollIndex={storyIndex}
+              estimatedItemSize={Metrics.windowWidth}
+              overrideItemLayout={layout => {
+                layout.size = Metrics.windowWidth;
+              }}
+              keyboardShouldPersistTaps="handled"
+              onLayout={() => setIsTransitionActive(true)}
+              onViewableItemsChanged={onViewRef.current}
+              viewabilityConfig={viewabilityConfig.current}
+              keyExtractor={item => item?.title + item?.id?.toString()}
+              extraData={storyIndex}
+              renderItem={({ item, index }: ListItemProps) => (
+                <Animated.View
+                  style={[
+                    {
+                      height: Metrics.windowHeight,
+                      width: Metrics.windowWidth,
+                    },
+                    listAnimatedStyle,
+                  ]}>
+                  <MultiStoryListItem
+                    ref={(elements: any) =>
+                      (itemsRef.current[index] = elements)
+                    }
+                    {...{
+                      item,
+                      index,
+                      storyIndex,
+                      onComplete,
+                      viewedStories,
+                      scrollX,
+                      isTransitionActive,
+                      flatListRef,
+                      storyLength: stories.length,
+                    }}
+                    {...props}
+                  />
+                </Animated.View>
+              )}
+            />
+          </Animated.View>
+        </GestureDetector>
+      </GestureHandlerRootView>
     </Modal>
   );
 };
 
-export default MultiStoryContainer;
+export default memo(MultiStoryContainer);

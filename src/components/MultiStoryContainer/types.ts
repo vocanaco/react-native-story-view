@@ -36,6 +36,8 @@ export interface MultiStoryListItemProps
   transitionMode?: TransitionMode;
   scrollX: ScrollValue;
   isTransitionActive: boolean;
+  flatListRef: any;
+  storyLength: number;
   gestureHandler?: (e: GestureHandlerEvent<any>) => void;
 }
 

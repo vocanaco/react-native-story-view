@@ -12,6 +12,8 @@
   "dependencies": {
     "@react-navigation/native": "^6.0.11",
     "@react-navigation/native-stack": "^6.7.0",
+    "@shopify/flash-list": "^1.6.4",
+    "lodash": "^4.17.21",
     "patch-package": "^6.4.7",
     "react": "18.2.0",
     "react-native": "0.71.16",
@@ -27,6 +29,7 @@
     "@babel/runtime": "^7.12.5",
     "@react-native-community/eslint-config": "^3.0.1",
     "@types/jest": "^27.4.0",
+    "@types/lodash": "^4.17.0",
     "@types/react-native": "^0.67.3",
     "@types/react-test-renderer": "^17.0.1",
     "@typescript-eslint/eslint-plugin": "^5.17.0",
