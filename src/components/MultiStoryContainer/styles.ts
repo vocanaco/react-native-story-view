@@ -11,6 +11,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.transparent,
   },
+  mainFlashListContainer: {
+    height: Metrics.windowHeight,
+    width: Metrics.windowWidth,
+  },
   itemContainer: {
     height: Metrics.windowHeight,
     width: Metrics.windowWidth,
