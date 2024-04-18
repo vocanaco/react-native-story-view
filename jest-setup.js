@@ -16,6 +16,7 @@ jest.mock('react-native-reanimated', () => {
     useAnimatedReaction: jest.fn,
     useValue: jest.fn,
     event: jest.fn(),
+    createAnimatedComponent: jest.fn,
   };
 });
 

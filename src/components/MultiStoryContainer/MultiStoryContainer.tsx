@@ -1,4 +1,4 @@
-import { FlashList } from '@shopify/flash-list';
+import { FlashList, FlashListProps } from '@shopify/flash-list';
 import React, {
   forwardRef,
   memo,
@@ -7,7 +7,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { Modal, View } from 'react-native';
+import { Modal } from 'react-native';
 import {
   GestureDetector,
   GestureHandlerRootView,
@@ -16,7 +16,7 @@ import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { Metrics } from '../../theme';
 import { Footer } from '../Footer';
 import { Indicator, ProfileHeader, StoryContainer } from '../StoryView';
-import type { StoryRef } from '../StoryView/types';
+import type { StoriesType, StoryRef } from '../StoryView/types';
 import { useMultiStoryContainer } from './hooks';
 import styles from './styles';
 import {
@@ -26,11 +26,14 @@ import {
   MultiStoryListItemProps,
   TransitionMode,
 } from './types';
-import {
-  cubeTransition,
-  defaultTransition,
-  scaleTransition,
-} from './utils/StoryTransitions';
+import { cubeTransition, scaleTransition } from './utils/StoryTransitions';
+
+/**
+ * AnimatedFlashList is a wrapper around FlashList component to animate the list items.
+ * Main purpose to wrap inside Animated to use useAnimatedScrollHandler for scroll animation.
+ */
+const AnimatedFlashList =
+  Animated.createAnimatedComponent<FlashListProps<StoriesType>>(FlashList);
 
 const MultiStoryListItem = forwardRef<ListItemRef, MultiStoryListItemProps>(
   (
@@ -49,6 +52,7 @@ const MultiStoryListItem = forwardRef<ListItemRef, MultiStoryListItemProps>(
     ref
   ) => {
     const storyRef = useRef<StoryRef>(null);
+
     const storyInitialIndex: number = viewedStories?.[index]?.findIndex(
       (val: boolean) => !val
     );
@@ -60,17 +64,24 @@ const MultiStoryListItem = forwardRef<ListItemRef, MultiStoryListItemProps>(
         storyRef?.current?.handleLongPress(visibility),
     }));
 
+    const width = Metrics.windowWidth;
+    const perspective = width;
+    const offset = index * width;
+    const ratio = Metrics.isIOS ? 2 : 1;
+    const inputRange = [offset - width, offset + width];
+    const angle = Math.atan(perspective / (width / ratio));
+
     const animationStyle = useAnimatedStyle(() => {
       if (scrollX.value === 0) {
-        return defaultTransition();
+        return {};
       }
       switch (props.transitionMode) {
         case TransitionMode.Cube:
-          return cubeTransition(index, scrollX);
+          return cubeTransition(scrollX, offset, inputRange, angle, width);
         case TransitionMode.Scale:
           return scaleTransition(index, scrollX);
         default:
-          return defaultTransition();
+          return {};
       }
     }, [index, scrollX.value]);
 
@@ -95,9 +106,11 @@ const MultiStoryListItem = forwardRef<ListItemRef, MultiStoryListItemProps>(
     };
 
     return (
-      <View key={item.id} style={styles.itemContainer}>
-        {storyIndex === index || isTransitionActive ? (
-          <Animated.View style={animationStyle}>
+      <>
+        <Animated.View
+          key={item.id}
+          style={[styles.itemContainer, animationStyle]}>
+          {storyIndex === index || isTransitionActive ? (
             <StoryContainer
               visible={true}
               extended={false}
@@ -124,11 +137,11 @@ const MultiStoryListItem = forwardRef<ListItemRef, MultiStoryListItemProps>(
               index={index}
               userStoryIndex={storyIndex}
             />
-          </Animated.View>
-        ) : (
-          props?.renderIndicatorComponent?.() ?? <Indicator />
-        )}
-      </View>
+          ) : (
+            props?.renderIndicatorComponent?.() ?? <Indicator />
+          )}
+        </Animated.View>
+      </>
     );
   }
 );
@@ -186,12 +199,8 @@ const MultiStoryContainer = ({
       onRequestClose={() => onComplete?.()}>
       <GestureHandlerRootView style={styles.rootViewStyle}>
         <GestureDetector gesture={gestureHandler}>
-          <Animated.View
-            style={{
-              height: Metrics.windowHeight,
-              width: Metrics.windowWidth,
-            }}>
-            <FlashList
+          <Animated.View style={styles.mainFlashListContainer}>
+            <AnimatedFlashList
               horizontal
               pagingEnabled
               bounces={false}
@@ -215,13 +224,7 @@ const MultiStoryContainer = ({
               extraData={storyIndex}
               renderItem={({ item, index }: ListItemProps) => (
                 <Animated.View
-                  style={[
-                    {
-                      height: Metrics.windowHeight,
-                      width: Metrics.windowWidth,
-                    },
-                    listAnimatedStyle,
-                  ]}>
+                  style={[styles.mainFlashListContainer, listAnimatedStyle]}>
                   <MultiStoryListItem
                     ref={(elements: any) =>
                       (itemsRef.current[index] = elements)

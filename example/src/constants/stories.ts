@@ -71,7 +71,7 @@ const stories = [
     stories: [
       {
         id: 0,
-        url: 'https://static.wikia.nocookie.net/selenagomez/images/c/c4/Stars_Dance_Standard.jpg/revision/latest?cb=20160510194715',
+        url: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
         type: 'image',
         duration: 5,
         isReadMore: true,
@@ -80,7 +80,7 @@ const stories = [
       },
       {
         id: 1,
-        url: 'https://akns-images.eonline.com/eol_images/Entire_Site/202336/rs_1028x1024-230406133109-Hollywood_record_label.png?fit=around%7C1028:1024&output-quality=90&crop=1028:1024;center,top',
+        url: 'https://images.unsplash.com/photo-1504215680853-026ed2a45def?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
         type: 'image',
         duration: 10,
         isReadMore: true,
@@ -98,7 +98,7 @@ const stories = [
     stories: [
       {
         id: 0,
-        url: 'https://i.discogs.com/xCYSQK3tBLUJqmoqi08VLPBCIPMX1J-TKSaohDaOwFc/rs:fit/g:sm/q:90/h:491/w:486/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTQ3NDM3/MjAtMTM3NDA5ODE4/Ny05MDYyLmpwZWc.jpeg',
+        url: 'https://images.unsplash.com/photo-1713288971566-40cd263c2792?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
         type: 'image',
         duration: 5,
         isReadMore: true,
@@ -107,7 +107,7 @@ const stories = [
       },
       {
         id: 1,
-        url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-amD7xS8_-BzQbfUSRiPx8ciTEg34PMJpfg&usqp=CAU',
+        url: 'https://images.unsplash.com/photo-1713149486567-26a1413e0da2?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
         type: 'image',
         duration: 10,
         isReadMore: true,
@@ -119,17 +119,16 @@ const stories = [
   {
     id: 5,
     username: "K'naan",
-    profile:
-      'https://m.media-amazon.com/images/M/MV5BM2Q0NmVjZmEtZTJlNS00NGQ5LTkxYzAtODk5ZmI2MTZkZWMzXkEyXkFqcGdeQXVyMjA4OTI5NDQ@._V1_.jpg',
+    profile: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg',
     title: 'Single Album',
     stories: [
       {
         id: 0,
-        url: 'https://cdns-images.dzcdn.net/images/cover/1fc68087a940ef86d9c304e39e6fa4c5/500x500.jpg',
-        type: 'image',
-        duration: 5,
+        url: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        type: 'video',
+        duration: 20,
         isReadMore: true,
-        storyId: 4,
+        storyId: 5,
         isSeen: false
       }
     ]

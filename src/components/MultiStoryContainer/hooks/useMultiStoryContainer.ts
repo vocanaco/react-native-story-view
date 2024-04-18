@@ -1,5 +1,8 @@
 import { useRef, useState } from 'react';
-import { useSharedValue } from 'react-native-reanimated';
+import {
+  useAnimatedScrollHandler,
+  useSharedValue,
+} from 'react-native-reanimated';
 import { useKeyboardListener } from '../../../hooks';
 import type {
   MultiStoryContainerProps,
@@ -23,9 +26,9 @@ const useMultiStoryContainer = (
     itemVisiblePercentThreshold: 70,
   });
   const isKeyboardVisible = useKeyboardListener();
-  const onScroll = (event: any) => {
-    scrollX.value = event.nativeEvent.contentOffset.x;
-  };
+  const onScroll = useAnimatedScrollHandler(event => {
+    scrollX.value = event.contentOffset.x;
+  });
 
   const onViewRef = useRef(({ viewableItems }: ViewConfig) => {
     const index = viewableItems?.[0]?.index;
