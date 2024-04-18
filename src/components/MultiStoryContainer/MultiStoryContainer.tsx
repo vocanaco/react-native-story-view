@@ -1,32 +1,23 @@
 import { FlashList, FlashListProps } from '@shopify/flash-list';
-import React, {
-  forwardRef,
-  memo,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from 'react';
+import React, { forwardRef, memo, useEffect, useRef, useState } from 'react';
 import { Modal } from 'react-native';
 import {
   GestureDetector,
   GestureHandlerRootView,
 } from 'react-native-gesture-handler';
-import Animated, { useAnimatedStyle } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { Metrics } from '../../theme';
 import { Footer } from '../Footer';
 import { Indicator, ProfileHeader, StoryContainer } from '../StoryView';
-import type { StoriesType, StoryRef } from '../StoryView/types';
-import { useMultiStoryContainer } from './hooks';
+import type { StoriesType } from '../StoryView/types';
+import { useMultiStoryContainer, useMultiStoryItems } from './hooks';
 import styles from './styles';
-import {
+import type {
   ListItemProps,
   ListItemRef,
   MultiStoryContainerProps,
   MultiStoryListItemProps,
-  TransitionMode,
 } from './types';
-import { cubeTransition, scaleTransition } from './utils/StoryTransitions';
 
 /**
  * AnimatedFlashList is a wrapper around FlashList component to animate the list items.
@@ -47,63 +38,29 @@ const MultiStoryListItem = forwardRef<ListItemRef, MultiStoryListItemProps>(
       isTransitionActive,
       flatListRef,
       storyLength,
+      isInitialStory,
       ...props
     }: MultiStoryListItemProps,
     ref
   ) => {
-    const storyRef = useRef<StoryRef>(null);
-
-    const storyInitialIndex: number = viewedStories?.[index]?.findIndex(
-      (val: boolean) => !val
+    const {
+      animationStyle,
+      nextStory,
+      previousStory,
+      storyInitialIndex,
+      storyRef,
+    } = useMultiStoryItems(
+      index,
+      ref,
+      viewedStories,
+      storyIndex,
+      storyLength,
+      isInitialStory,
+      onComplete,
+      scrollX,
+      flatListRef,
+      props?.transitionMode
     );
-
-    useImperativeHandle(ref, () => ({
-      onScrollBegin: () => storyRef?.current?.pause(true),
-      onScrollEnd: () => storyRef?.current?.pause(false),
-      handleLongPress: (visibility: boolean) =>
-        storyRef?.current?.handleLongPress(visibility),
-    }));
-
-    const width = Metrics.windowWidth;
-    const perspective = width;
-    const offset = index * width;
-    const ratio = Metrics.isIOS ? 2 : 1;
-    const inputRange = [offset - width, offset + width];
-    const angle = Math.atan(perspective / (width / ratio));
-
-    const animationStyle = useAnimatedStyle(() => {
-      if (scrollX.value === 0) {
-        return {};
-      }
-      switch (props.transitionMode) {
-        case TransitionMode.Cube:
-          return cubeTransition(scrollX, offset, inputRange, angle, width);
-        case TransitionMode.Scale:
-          return scaleTransition(index, scrollX);
-        default:
-          return {};
-      }
-    }, [index, scrollX.value]);
-
-    const nextStory = () => {
-      if (storyIndex + 1 === storyLength) {
-        onComplete?.();
-        return;
-      }
-      if (storyIndex >= storyLength - 1) return;
-      flatListRef.current?.scrollToIndex({
-        index: storyIndex + 1,
-        animated: true,
-      });
-    };
-
-    const previousStory = () => {
-      if (storyIndex === 0) return;
-      flatListRef.current?.scrollToIndex({
-        index: storyIndex - 1,
-        animated: true,
-      });
-    };
 
     return (
       <>
@@ -155,6 +112,7 @@ const MultiStoryContainer = ({
   ...props
 }: MultiStoryContainerProps) => {
   const flatListRef = useRef<any>(null);
+  const initialStoryIndex = useRef(props.userStoryIndex);
   const itemsRef = useRef<ListItemRef[]>([]);
   const [isTransitionActive, setIsTransitionActive] = useState<boolean>(false);
 
@@ -239,6 +197,7 @@ const MultiStoryContainer = ({
                       isTransitionActive,
                       flatListRef,
                       storyLength: stories.length,
+                      isInitialStory: initialStoryIndex.current === index,
                     }}
                     {...props}
                   />
