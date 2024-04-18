@@ -39,6 +39,7 @@ export interface MultiStoryListItemProps
   flatListRef: any;
   storyLength: number;
   gestureHandler?: (e: GestureHandlerEvent<any>) => void;
+  isInitialStory?: boolean;
 }
 
 export interface ViewConfig {
