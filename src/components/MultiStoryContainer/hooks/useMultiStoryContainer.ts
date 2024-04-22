@@ -8,49 +8,64 @@ import type {
   MultiStoryContainerProps,
   ScrollValue,
   ViewConfig,
+  ViewableItemsRef,
 } from '../types';
 import useDraggableGesture from './useDraggableGesture';
 
 const useMultiStoryContainer = (
   _flatListRef: any,
   { userStoryIndex, backgroundColor }: Partial<MultiStoryContainerProps>,
-  onScrollBeginDrag: () => void,
-  onScrollEndDrag: () => void,
   handleLongPress: (visibility: boolean) => void,
   onComplete?: () => void
 ) => {
   const [storyIndex, setStoryIndex] = useState(userStoryIndex ?? 0);
+  const [isScrollActive, setIsScrollActive] = useState<boolean>(false);
+  const isScrollActiveRef = useRef<boolean>(false);
+  const viewableItemsRef = useRef<ViewableItemsRef>(null);
+  const storyIndexRef = useRef<number>(userStoryIndex ?? 0); // We use the storyIndexRef to keep track of the current story index
   const scrollX: ScrollValue = useSharedValue(0);
   const previousIndex = useRef<number>(0);
   const viewabilityConfig = useRef({
     itemVisiblePercentThreshold: 70,
+    waitForInteraction: true,
   });
   const isKeyboardVisible = useKeyboardListener();
   const onScroll = useAnimatedScrollHandler(event => {
     scrollX.value = event.contentOffset.x;
   });
 
-  const onViewRef = useRef(({ viewableItems }: ViewConfig) => {
-    const index = viewableItems?.[0]?.index;
-    if (index == null) return;
+  const updateStoryIndex = () => {
+    if (viewableItemsRef.current?.index == null) return;
     /* viewableItems returns array of current/next viewable item
            During story transition current/next or previous/current both visible on screen so array contains both items.
-           To consider only next/previous item, checking length is only 1 and it is not previous story.  
+           To consider only next/previous item, checking length is only 1 and it is not previous story.
         */
-    if (viewableItems.length === 1 && index !== previousIndex.current) {
-      setStoryIndex(index);
-      previousIndex.current = index;
+    if (
+      viewableItemsRef.current?.length === 1 &&
+      viewableItemsRef.current?.index !== previousIndex.current
+    ) {
+      setStoryIndex(viewableItemsRef.current?.index);
+      storyIndexRef.current = viewableItemsRef.current?.index;
+      previousIndex.current = viewableItemsRef.current?.index;
     }
-  });
+  };
+
+  const onViewRef = ({ viewableItems }: ViewConfig) => {
+    const index = viewableItems?.[0]?.index;
+    viewableItemsRef.current = { index: index, length: viewableItems?.length };
+
+    // If scrolling is active, we will update the story index on scroll end.
+    // If scrolling is not active, we will update the story index on view change.
+    !isScrollActiveRef.current && updateStoryIndex();
+  };
 
   const { listStyle, rootStyle, gestureHandler, listAnimatedStyle } =
     useDraggableGesture({
       backgroundColor,
       onComplete,
-      onScrollBeginDrag,
-      onScrollEndDrag,
       handleLongPress,
       isKeyboardVisible,
+      isScrollActive,
     });
 
   return {
@@ -65,6 +80,10 @@ const useMultiStoryContainer = (
     onScroll,
     listAnimatedStyle,
     isKeyboardVisible,
+    setIsScrollActive,
+    updateStoryIndex,
+    isScrollActiveRef,
+    storyIndexRef,
   };
 };
 

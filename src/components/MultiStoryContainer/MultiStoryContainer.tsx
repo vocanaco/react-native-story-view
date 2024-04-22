@@ -120,10 +120,8 @@ const MultiStoryContainer = ({
     itemsRef.current = itemsRef.current.slice(0, stories.length);
   }, [itemsRef, stories]);
 
-  const onScrollBeginDrag = () => itemsRef.current[storyIndex]?.onScrollBegin();
-  const onScrollEndDrag = () => itemsRef.current[storyIndex]?.onScrollEnd();
   const handleLongPress = (visiblity: boolean) => {
-    itemsRef.current[storyIndex]?.handleLongPress(visiblity);
+    itemsRef.current[storyIndexRef.current]?.handleLongPress(visiblity);
   };
 
   const {
@@ -135,14 +133,24 @@ const MultiStoryContainer = ({
     scrollX,
     listAnimatedStyle,
     isKeyboardVisible,
-  } = useMultiStoryContainer(
-    flatListRef,
-    props,
-    onScrollBeginDrag,
-    onScrollEndDrag,
-    handleLongPress,
-    onComplete
-  );
+    setIsScrollActive,
+    updateStoryIndex,
+    isScrollActiveRef,
+    storyIndexRef,
+  } = useMultiStoryContainer(flatListRef, props, handleLongPress, onComplete);
+
+  const onScrollBeginDragFlashList = () => {
+    setIsScrollActive(true);
+    isScrollActiveRef.current = true;
+    itemsRef.current[storyIndex]?.onScrollBegin();
+  };
+
+  const onScrollEndDragFlashList = () => {
+    setIsScrollActive(false);
+    isScrollActiveRef.current = false;
+    itemsRef.current[storyIndex]?.onScrollEnd();
+    updateStoryIndex();
+  };
 
   useEffect(() => {
     onUserStoryIndexChange?.(storyIndex);
@@ -166,8 +174,8 @@ const MultiStoryContainer = ({
               scrollEnabled={!isKeyboardVisible}
               ref={flatListRef}
               onScroll={onScroll}
-              onScrollBeginDrag={onScrollBeginDrag}
-              onScrollEndDrag={onScrollEndDrag}
+              onScrollBeginDrag={onScrollBeginDragFlashList}
+              onScrollEndDrag={onScrollEndDragFlashList}
               scrollEventThrottle={16}
               initialScrollIndex={storyIndex}
               estimatedItemSize={Metrics.windowWidth}
@@ -176,7 +184,7 @@ const MultiStoryContainer = ({
               }}
               keyboardShouldPersistTaps="handled"
               onLayout={() => setIsTransitionActive(true)}
-              onViewableItemsChanged={onViewRef.current}
+              onViewableItemsChanged={onViewRef}
               viewabilityConfig={viewabilityConfig.current}
               keyExtractor={item => item?.title + item?.id?.toString()}
               extraData={storyIndex}

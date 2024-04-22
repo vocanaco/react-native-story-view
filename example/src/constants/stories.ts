@@ -71,7 +71,7 @@ const stories = [
     stories: [
       {
         id: 0,
-        url: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        url: 'https://img.freepik.com/free-photo/sliver-metallic-color-sport-car-driving-with-high-speed-road_114579-4029.jpg',
         type: 'image',
         duration: 5,
         isReadMore: true,
@@ -80,7 +80,7 @@ const stories = [
       },
       {
         id: 1,
-        url: 'https://images.unsplash.com/photo-1504215680853-026ed2a45def?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        url: 'https://img.freepik.com/free-photo/beautiful-countryside-road-greenery-forests_181624-5399.jpg',
         type: 'image',
         duration: 10,
         isReadMore: true,
@@ -98,7 +98,7 @@ const stories = [
     stories: [
       {
         id: 0,
-        url: 'https://images.unsplash.com/photo-1713288971566-40cd263c2792?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        url: 'https://img.freepik.com/free-photo/fresh-pink-blossoms-adorn-budding-cherry-tree-generated-by-ai_188544-10349.jpg',
         type: 'image',
         duration: 5,
         isReadMore: true,
@@ -107,7 +107,7 @@ const stories = [
       },
       {
         id: 1,
-        url: 'https://images.unsplash.com/photo-1713149486567-26a1413e0da2?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        url: 'https://img.freepik.com/free-photo/cosmos-flowers_1373-83.jpg',
         type: 'image',
         duration: 10,
         isReadMore: true,
@@ -124,7 +124,7 @@ const stories = [
     stories: [
       {
         id: 0,
-        url: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        url: 'https://videocdn.cdnpk.net/joy/content/video/free/video0467/large_preview/_import_615435000f6eb2.81789495.mp4?filename=1109603_1080p_4k_2k_3840x2160.mp4',
         type: 'video',
         duration: 20,
         isReadMore: true,
