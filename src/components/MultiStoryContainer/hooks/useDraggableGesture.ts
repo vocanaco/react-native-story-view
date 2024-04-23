@@ -10,14 +10,14 @@ import {
 import { Colors, Metrics } from '../../../theme';
 import styles from '../styles';
 import type { DraggableGestureProps } from '../types';
+import { useCallback } from 'react';
 
 const useDraggableGesture = ({
   backgroundColor,
   onComplete,
-  onScrollBeginDrag,
-  onScrollEndDrag,
   handleLongPress,
   isKeyboardVisible,
+  isScrollActive,
 }: DraggableGestureProps) => {
   const { height, width } = useWindowDimensions();
   const snapPoint: number = Metrics.screenHeight / 8;
@@ -31,6 +31,7 @@ const useDraggableGesture = ({
 
   const panGesture = Gesture.Pan()
     .activateAfterLongPress(200)
+    .enabled(!isScrollActive) // To disable the pan gesture while FlashList is scrolling
     .onChange(event => {
       if (event.velocityY === 0) return;
       if (event.translationY <= 0) {
@@ -75,6 +76,7 @@ const useDraggableGesture = ({
     });
 
   const longPressGesture = Gesture.LongPress()
+    .enabled(!isScrollActive) // To disable the long press while FlashList is scrolling
     .minDuration(200) // To disable the min duration
     .maxDistance(10000) // To disable the max distance
     .onStart(() => {
@@ -95,23 +97,18 @@ const useDraggableGesture = ({
     }
   );
 
-  const handleScroll = () => {
-    if (isDragged.value === undefined) return;
-    isDragged.value ? onScrollBeginDrag?.() : onScrollEndDrag?.();
-  };
-
-  useAnimatedReaction(
-    () => isDragged.value,
+  /**
+   * Handle the visibility of the view
+   * Here we are use the useCallback to stop the re-initialize the function on every render
+   */
+  const handleVisibility = useCallback(
     () => {
-      if (isKeyboardVisible) return;
-      runOnJS(handleScroll)();
-    }
+      if (isLongPressed.value === undefined) return;
+      handleLongPress?.(isLongPressed.value);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
-
-  const handleVisibility = () => {
-    if (isLongPressed.value === undefined) return;
-    handleLongPress?.(isLongPressed.value);
-  };
 
   useAnimatedReaction(
     () => isLongPressed.value,
