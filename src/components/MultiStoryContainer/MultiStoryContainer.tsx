@@ -1,36 +1,30 @@
-import { FlashList } from '@shopify/flash-list';
-import React, {
-  forwardRef,
-  memo,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from 'react';
-import { Modal, View } from 'react-native';
+import { FlashList, FlashListProps } from '@shopify/flash-list';
+import React, { forwardRef, memo, useEffect, useRef, useState } from 'react';
+import { Modal } from 'react-native';
 import {
   GestureDetector,
   GestureHandlerRootView,
 } from 'react-native-gesture-handler';
-import Animated, { useAnimatedStyle } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { Metrics } from '../../theme';
 import { Footer } from '../Footer';
 import { Indicator, ProfileHeader, StoryContainer } from '../StoryView';
-import type { StoryRef } from '../StoryView/types';
-import { useMultiStoryContainer } from './hooks';
+import type { StoriesType } from '../StoryView/types';
+import { useMultiStoryContainer, useMultiStoryItems } from './hooks';
 import styles from './styles';
-import {
+import type {
   ListItemProps,
   ListItemRef,
   MultiStoryContainerProps,
   MultiStoryListItemProps,
-  TransitionMode,
 } from './types';
-import {
-  cubeTransition,
-  defaultTransition,
-  scaleTransition,
-} from './utils/StoryTransitions';
+
+/**
+ * AnimatedFlashList is a wrapper around FlashList component to animate the list items.
+ * Main purpose to wrap inside Animated to use useAnimatedScrollHandler for scroll animation.
+ */
+const AnimatedFlashList =
+  Animated.createAnimatedComponent<FlashListProps<StoriesType>>(FlashList);
 
 const MultiStoryListItem = forwardRef<ListItemRef, MultiStoryListItemProps>(
   (
@@ -44,60 +38,36 @@ const MultiStoryListItem = forwardRef<ListItemRef, MultiStoryListItemProps>(
       isTransitionActive,
       flatListRef,
       storyLength,
+      isInitialStory,
       ...props
     }: MultiStoryListItemProps,
     ref
   ) => {
-    const storyRef = useRef<StoryRef>(null);
-    const storyInitialIndex: number = viewedStories?.[index]?.findIndex(
-      (val: boolean) => !val
+    const {
+      animationStyle,
+      nextStory,
+      previousStory,
+      storyInitialIndex,
+      storyRef,
+    } = useMultiStoryItems(
+      index,
+      ref,
+      viewedStories,
+      storyIndex,
+      storyLength,
+      isInitialStory,
+      onComplete,
+      scrollX,
+      flatListRef,
+      props?.transitionMode
     );
 
-    useImperativeHandle(ref, () => ({
-      onScrollBegin: () => storyRef?.current?.pause(true),
-      onScrollEnd: () => storyRef?.current?.pause(false),
-      handleLongPress: (visibility: boolean) =>
-        storyRef?.current?.handleLongPress(visibility),
-    }));
-
-    const animationStyle = useAnimatedStyle(() => {
-      if (scrollX.value === 0) {
-        return defaultTransition();
-      }
-      switch (props.transitionMode) {
-        case TransitionMode.Cube:
-          return cubeTransition(index, scrollX);
-        case TransitionMode.Scale:
-          return scaleTransition(index, scrollX);
-        default:
-          return defaultTransition();
-      }
-    }, [index, scrollX.value]);
-
-    const nextStory = () => {
-      if (storyIndex + 1 === storyLength) {
-        onComplete?.();
-        return;
-      }
-      if (storyIndex >= storyLength - 1) return;
-      flatListRef.current?.scrollToIndex({
-        index: storyIndex + 1,
-        animated: true,
-      });
-    };
-
-    const previousStory = () => {
-      if (storyIndex === 0) return;
-      flatListRef.current?.scrollToIndex({
-        index: storyIndex - 1,
-        animated: true,
-      });
-    };
-
     return (
-      <View key={item.id} style={styles.itemContainer}>
-        {storyIndex === index || isTransitionActive ? (
-          <Animated.View style={animationStyle}>
+      <>
+        <Animated.View
+          key={item.id}
+          style={[styles.itemContainer, animationStyle]}>
+          {storyIndex === index || isTransitionActive ? (
             <StoryContainer
               visible={true}
               extended={false}
@@ -124,11 +94,11 @@ const MultiStoryListItem = forwardRef<ListItemRef, MultiStoryListItemProps>(
               index={index}
               userStoryIndex={storyIndex}
             />
-          </Animated.View>
-        ) : (
-          props?.renderIndicatorComponent?.() ?? <Indicator />
-        )}
-      </View>
+          ) : (
+            props?.renderIndicatorComponent?.() ?? <Indicator />
+          )}
+        </Animated.View>
+      </>
     );
   }
 );
@@ -142,6 +112,7 @@ const MultiStoryContainer = ({
   ...props
 }: MultiStoryContainerProps) => {
   const flatListRef = useRef<any>(null);
+  const initialStoryIndex = useRef(props.userStoryIndex);
   const itemsRef = useRef<ListItemRef[]>([]);
   const [isTransitionActive, setIsTransitionActive] = useState<boolean>(false);
 
@@ -149,10 +120,8 @@ const MultiStoryContainer = ({
     itemsRef.current = itemsRef.current.slice(0, stories.length);
   }, [itemsRef, stories]);
 
-  const onScrollBeginDrag = () => itemsRef.current[storyIndex]?.onScrollBegin();
-  const onScrollEndDrag = () => itemsRef.current[storyIndex]?.onScrollEnd();
   const handleLongPress = (visiblity: boolean) => {
-    itemsRef.current[storyIndex]?.handleLongPress(visiblity);
+    itemsRef.current[storyIndexRef.current]?.handleLongPress(visiblity);
   };
 
   const {
@@ -164,14 +133,24 @@ const MultiStoryContainer = ({
     scrollX,
     listAnimatedStyle,
     isKeyboardVisible,
-  } = useMultiStoryContainer(
-    flatListRef,
-    props,
-    onScrollBeginDrag,
-    onScrollEndDrag,
-    handleLongPress,
-    onComplete
-  );
+    setIsScrollActive,
+    updateStoryIndex,
+    isScrollActiveRef,
+    storyIndexRef,
+  } = useMultiStoryContainer(flatListRef, props, handleLongPress, onComplete);
+
+  const onScrollBeginDragFlashList = () => {
+    setIsScrollActive(true);
+    isScrollActiveRef.current = true;
+    itemsRef.current[storyIndex]?.onScrollBegin();
+  };
+
+  const onScrollEndDragFlashList = () => {
+    setIsScrollActive(false);
+    isScrollActiveRef.current = false;
+    itemsRef.current[storyIndex]?.onScrollEnd();
+    updateStoryIndex();
+  };
 
   useEffect(() => {
     onUserStoryIndexChange?.(storyIndex);
@@ -186,12 +165,8 @@ const MultiStoryContainer = ({
       onRequestClose={() => onComplete?.()}>
       <GestureHandlerRootView style={styles.rootViewStyle}>
         <GestureDetector gesture={gestureHandler}>
-          <Animated.View
-            style={{
-              height: Metrics.windowHeight,
-              width: Metrics.windowWidth,
-            }}>
-            <FlashList
+          <Animated.View style={styles.mainFlashListContainer}>
+            <AnimatedFlashList
               horizontal
               pagingEnabled
               bounces={false}
@@ -199,8 +174,8 @@ const MultiStoryContainer = ({
               scrollEnabled={!isKeyboardVisible}
               ref={flatListRef}
               onScroll={onScroll}
-              onScrollBeginDrag={onScrollBeginDrag}
-              onScrollEndDrag={onScrollEndDrag}
+              onScrollBeginDrag={onScrollBeginDragFlashList}
+              onScrollEndDrag={onScrollEndDragFlashList}
               scrollEventThrottle={16}
               initialScrollIndex={storyIndex}
               estimatedItemSize={Metrics.windowWidth}
@@ -209,19 +184,13 @@ const MultiStoryContainer = ({
               }}
               keyboardShouldPersistTaps="handled"
               onLayout={() => setIsTransitionActive(true)}
-              onViewableItemsChanged={onViewRef.current}
+              onViewableItemsChanged={onViewRef}
               viewabilityConfig={viewabilityConfig.current}
               keyExtractor={item => item?.title + item?.id?.toString()}
               extraData={storyIndex}
               renderItem={({ item, index }: ListItemProps) => (
                 <Animated.View
-                  style={[
-                    {
-                      height: Metrics.windowHeight,
-                      width: Metrics.windowWidth,
-                    },
-                    listAnimatedStyle,
-                  ]}>
+                  style={[styles.mainFlashListContainer, listAnimatedStyle]}>
                   <MultiStoryListItem
                     ref={(elements: any) =>
                       (itemsRef.current[index] = elements)
@@ -236,6 +205,7 @@ const MultiStoryContainer = ({
                       isTransitionActive,
                       flatListRef,
                       storyLength: stories.length,
+                      isInitialStory: initialStoryIndex.current === index,
                     }}
                     {...props}
                   />

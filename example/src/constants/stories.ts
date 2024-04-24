@@ -71,7 +71,7 @@ const stories = [
     stories: [
       {
         id: 0,
-        url: 'https://static.wikia.nocookie.net/selenagomez/images/c/c4/Stars_Dance_Standard.jpg/revision/latest?cb=20160510194715',
+        url: 'https://img.freepik.com/free-photo/sliver-metallic-color-sport-car-driving-with-high-speed-road_114579-4029.jpg',
         type: 'image',
         duration: 5,
         isReadMore: true,
@@ -80,7 +80,7 @@ const stories = [
       },
       {
         id: 1,
-        url: 'https://akns-images.eonline.com/eol_images/Entire_Site/202336/rs_1028x1024-230406133109-Hollywood_record_label.png?fit=around%7C1028:1024&output-quality=90&crop=1028:1024;center,top',
+        url: 'https://img.freepik.com/free-photo/beautiful-countryside-road-greenery-forests_181624-5399.jpg',
         type: 'image',
         duration: 10,
         isReadMore: true,
@@ -98,7 +98,7 @@ const stories = [
     stories: [
       {
         id: 0,
-        url: 'https://i.discogs.com/xCYSQK3tBLUJqmoqi08VLPBCIPMX1J-TKSaohDaOwFc/rs:fit/g:sm/q:90/h:491/w:486/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTQ3NDM3/MjAtMTM3NDA5ODE4/Ny05MDYyLmpwZWc.jpeg',
+        url: 'https://img.freepik.com/free-photo/fresh-pink-blossoms-adorn-budding-cherry-tree-generated-by-ai_188544-10349.jpg',
         type: 'image',
         duration: 5,
         isReadMore: true,
@@ -107,7 +107,7 @@ const stories = [
       },
       {
         id: 1,
-        url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-amD7xS8_-BzQbfUSRiPx8ciTEg34PMJpfg&usqp=CAU',
+        url: 'https://img.freepik.com/free-photo/cosmos-flowers_1373-83.jpg',
         type: 'image',
         duration: 10,
         isReadMore: true,
@@ -119,17 +119,16 @@ const stories = [
   {
     id: 5,
     username: "K'naan",
-    profile:
-      'https://m.media-amazon.com/images/M/MV5BM2Q0NmVjZmEtZTJlNS00NGQ5LTkxYzAtODk5ZmI2MTZkZWMzXkEyXkFqcGdeQXVyMjA4OTI5NDQ@._V1_.jpg',
+    profile: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg',
     title: 'Single Album',
     stories: [
       {
         id: 0,
-        url: 'https://cdns-images.dzcdn.net/images/cover/1fc68087a940ef86d9c304e39e6fa4c5/500x500.jpg',
-        type: 'image',
-        duration: 5,
+        url: 'https://videocdn.cdnpk.net/joy/content/video/free/video0467/large_preview/_import_615435000f6eb2.81789495.mp4?filename=1109603_1080p_4k_2k_3840x2160.mp4',
+        type: 'video',
+        duration: 20,
         isReadMore: true,
-        storyId: 4,
+        storyId: 5,
         isSeen: false
       }
     ]

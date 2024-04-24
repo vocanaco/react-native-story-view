@@ -39,6 +39,7 @@ export interface MultiStoryListItemProps
   flatListRef: any;
   storyLength: number;
   gestureHandler?: (e: GestureHandlerEvent<any>) => void;
+  isInitialStory?: boolean;
 }
 
 export interface ViewConfig {
@@ -60,10 +61,13 @@ export interface ListItemRef {
 export interface DraggableGestureProps {
   backgroundColor?: string;
   onComplete?: () => void;
-  onScrollBeginDrag: () => void;
-  onScrollEndDrag: () => void;
   handleLongPress: (visibility: boolean) => void;
   isKeyboardVisible: boolean;
+  isScrollActive: boolean;
 }
 
+export type ViewableItemsRef = {
+  index: number | null;
+  length: number;
+} | null;
 export type ScrollValue = SharedValue<number>;
