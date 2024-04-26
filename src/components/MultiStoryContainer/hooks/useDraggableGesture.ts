@@ -29,6 +29,21 @@ const useDraggableGesture = ({
   const isDragged = useSharedValue<boolean | undefined>(undefined);
   const isLongPressed = useSharedValue<boolean | undefined>(undefined);
 
+  const onEndHandler = () => {
+    'worklet';
+    translateY.value = withTiming(
+      0,
+      {
+        duration: 300,
+      },
+      finished => {
+        if (finished) {
+          isLongPressed.value = false;
+        }
+      }
+    );
+  };
+
   const panGesture = Gesture.Pan()
     .activateAfterLongPress(200)
     .enabled(!isScrollActive) // To disable the pan gesture while FlashList is scrolling
@@ -56,7 +71,6 @@ const useDraggableGesture = ({
       }
     })
     .onEnd(event => {
-      isLongPressed.value = false;
       isDragged.value = false;
       if (event.translationY > snapPoint) {
         scale.value = withTiming(
@@ -66,12 +80,11 @@ const useDraggableGesture = ({
           },
           () => {
             isCompleted.value = true;
+            isLongPressed.value = false;
           }
         );
       } else {
-        translateY.value = withTiming(0, {
-          duration: 300,
-        });
+        onEndHandler();
       }
     });
 
@@ -83,7 +96,7 @@ const useDraggableGesture = ({
       isLongPressed.value = true;
     })
     .onEnd(() => {
-      isLongPressed.value = false;
+      onEndHandler();
     });
 
   const gestureHandler = Gesture.Simultaneous(panGesture, longPressGesture);
