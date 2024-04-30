@@ -1,22 +1,29 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
+  interpolate,
   useAnimatedScrollHandler,
+  useAnimatedStyle,
   useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
 import { useKeyboardListener } from '../../../hooks';
 import type {
   MultiStoryContainerProps,
+  PointerType,
   ScrollValue,
   ViewConfig,
   ViewableItemsRef,
 } from '../types';
+import { Metrics } from '../../../theme';
 import useDraggableGesture from './useDraggableGesture';
 
 const useMultiStoryContainer = (
   _flatListRef: any,
   { userStoryIndex, backgroundColor }: Partial<MultiStoryContainerProps>,
   handleLongPress: (visibility: boolean) => void,
-  onComplete?: () => void
+  onComplete?: () => void,
+  pointers?: PointerType,
+  visible?: boolean
 ) => {
   const [storyIndex, setStoryIndex] = useState(userStoryIndex ?? 0);
   const [isScrollActive, setIsScrollActive] = useState<boolean>(false);
@@ -59,6 +66,36 @@ const useMultiStoryContainer = (
     !isScrollActiveRef.current && updateStoryIndex();
   };
 
+  const layoutValue = useSharedValue(0);
+
+  useEffect(() => {
+    if (visible) {
+      layoutValue.value = withTiming(1, { duration: 400 }); // Default open Modal animation duration is 400
+    }
+  }, [layoutValue, visible]);
+
+  const animationModalStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateY: interpolate(
+            layoutValue.value,
+            [0, 1],
+            [-(Metrics.windowHeight / 2 - (pointers?.pageY ?? 0)), 0]
+          ),
+        },
+        {
+          translateX: interpolate(
+            layoutValue.value,
+            [0, 1],
+            [-(Metrics.windowWidth / 2 - (pointers?.pageX ?? 0)), 0]
+          ),
+        },
+        { scale: interpolate(layoutValue.value, [0, 1], [0, 1]) },
+      ],
+    };
+  }, [layoutValue, pointers]);
+
   const { listStyle, rootStyle, gestureHandler, listAnimatedStyle } =
     useDraggableGesture({
       backgroundColor,
@@ -66,6 +103,7 @@ const useMultiStoryContainer = (
       handleLongPress,
       isKeyboardVisible,
       isScrollActive,
+      pointers,
     });
 
   return {
@@ -84,6 +122,7 @@ const useMultiStoryContainer = (
     updateStoryIndex,
     isScrollActiveRef,
     storyIndexRef,
+    animationModalStyle,
   };
 };
 
