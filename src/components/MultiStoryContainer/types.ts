@@ -17,6 +17,7 @@ export interface MultiStoryContainerProps
   userStoryIndex?: number;
   visible?: boolean;
   viewedStories: Array<boolean[]>;
+  pointers?: { pageX: number; pageY: number };
   onChangePosition?: (
     storyIndex: number,
     userIndex?: number
@@ -64,6 +65,7 @@ export interface DraggableGestureProps {
   handleLongPress: (visibility: boolean) => void;
   isKeyboardVisible: boolean;
   isScrollActive: boolean;
+  pointers?: PointerType;
 }
 
 export type ViewableItemsRef = {
@@ -71,3 +73,5 @@ export type ViewableItemsRef = {
   length: number;
 } | null;
 export type ScrollValue = SharedValue<number>;
+
+export type PointerType = { pageX: number; pageY: number };

@@ -1,6 +1,7 @@
 import { StyleSheet, useWindowDimensions } from 'react-native';
 import { Gesture } from 'react-native-gesture-handler';
 import {
+  interpolate,
   runOnJS,
   useAnimatedReaction,
   useAnimatedStyle,
@@ -18,6 +19,7 @@ const useDraggableGesture = ({
   handleLongPress,
   isKeyboardVisible,
   isScrollActive,
+  pointers = { pageX: 0, pageY: 0 },
 }: DraggableGestureProps) => {
   const { height, width } = useWindowDimensions();
   const snapPoint: number = Metrics.screenHeight / 8;
@@ -28,6 +30,22 @@ const useDraggableGesture = ({
   const isCompleted = useSharedValue<boolean>(false);
   const isDragged = useSharedValue<boolean | undefined>(undefined);
   const isLongPressed = useSharedValue<boolean | undefined>(undefined);
+  const speed = 300; // Animation speed in milliseconds
+
+  const onEndHandler = () => {
+    'worklet';
+    translateY.value = withTiming(
+      0,
+      {
+        duration: speed,
+      },
+      finished => {
+        if (finished) {
+          isLongPressed.value = false;
+        }
+      }
+    );
+  };
 
   const panGesture = Gesture.Pan()
     .activateAfterLongPress(200)
@@ -50,28 +68,42 @@ const useDraggableGesture = ({
 
       // When user swipe down to snap point then scale the view or reset to 1
       if (event.translationY > snapPoint) {
-        scale.value = snapPoint / event.translationY;
+        scale.value = interpolate(
+          event.translationY,
+          [snapPoint, Metrics.screenHeight],
+          [1, 0.85]
+        );
       } else {
         scale.value = 1;
       }
     })
     .onEnd(event => {
-      isLongPressed.value = false;
       isDragged.value = false;
       if (event.translationY > snapPoint) {
         scale.value = withTiming(
           0,
           {
-            duration: 300,
+            duration: speed,
           },
           () => {
             isCompleted.value = true;
+            isLongPressed.value = false;
+          }
+        );
+        translateX.value = withTiming(
+          -(Metrics.windowWidth / 2 - pointers?.pageX), // Center Story on X-axis
+          {
+            duration: speed,
+          }
+        );
+        translateY.value = withTiming(
+          -(Metrics.windowHeight / 2 - pointers?.pageY), // Center Story on Y-axis
+          {
+            duration: speed,
           }
         );
       } else {
-        translateY.value = withTiming(0, {
-          duration: 300,
-        });
+        onEndHandler();
       }
     });
 
@@ -83,7 +115,9 @@ const useDraggableGesture = ({
       isLongPressed.value = true;
     })
     .onEnd(() => {
-      isLongPressed.value = false;
+      if (translateY.value < snapPoint) {
+        onEndHandler();
+      }
     });
 
   const gestureHandler = Gesture.Simultaneous(panGesture, longPressGesture);
@@ -120,9 +154,9 @@ const useDraggableGesture = ({
 
   const listAnimatedStyle = useAnimatedStyle(() => ({
     transform: [
-      { scale: scale.value },
       { translateX: translateX.value },
       { translateY: translateY.value },
+      { scale: scale.value },
     ],
     backgroundColor: !isDragged.value
       ? backgroundColor ?? Colors.black
