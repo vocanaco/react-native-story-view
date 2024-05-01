@@ -1,4 +1,5 @@
 import type {
+  GestureResponderEvent,
   ImageProps,
   ImageStyle,
   PressableProps,
@@ -14,7 +15,7 @@ export interface StoryAvatarProps extends StoryAvatarStyleProps {
   pressedIndex?: number;
   isStoryViewVisible?: boolean;
   viewedStories?: Array<boolean[]>;
-  openStories?: (position: number) => void;
+  openStories?: (position: number, gestureEvent: GestureResponderEvent) => void;
 }
 
 export interface StoryAvatarStyleProps {

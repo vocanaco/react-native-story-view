@@ -109,6 +109,7 @@ const MultiStoryContainer = ({
   onComplete,
   onUserStoryIndexChange,
   viewedStories = [],
+  pointers = { pageX: 0, pageY: 0 },
   ...props
 }: MultiStoryContainerProps) => {
   const flatListRef = useRef<any>(null);
@@ -137,7 +138,15 @@ const MultiStoryContainer = ({
     updateStoryIndex,
     isScrollActiveRef,
     storyIndexRef,
-  } = useMultiStoryContainer(flatListRef, props, handleLongPress, onComplete);
+    animationModalStyle,
+  } = useMultiStoryContainer(
+    flatListRef,
+    props,
+    handleLongPress,
+    onComplete,
+    pointers,
+    visible
+  );
 
   const onScrollBeginDragFlashList = () => {
     setIsScrollActive(true);
@@ -165,7 +174,8 @@ const MultiStoryContainer = ({
       onRequestClose={() => onComplete?.()}>
       <GestureHandlerRootView style={styles.rootViewStyle}>
         <GestureDetector gesture={gestureHandler}>
-          <Animated.View style={styles.mainFlashListContainer}>
+          <Animated.View
+            style={[styles.mainFlashListContainer, animationModalStyle]}>
             <AnimatedFlashList
               horizontal
               pagingEnabled
