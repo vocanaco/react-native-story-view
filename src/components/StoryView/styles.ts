@@ -164,6 +164,23 @@ const styles = StyleSheet.create({
     flex: 1,
     alignSelf: 'center',
   },
+  overlayViewStyle: {
+    position: 'absolute',
+    zIndex: 1,
+    alignSelf: 'center',
+  },
+  overlayMiddleViewStyle: {
+    top: 0,
+    bottom: 0,
+    flexDirection: 'column',
+    justifyContent: 'center',
+  },
+  overlayTopViewStyle: {
+    top: 100,
+  },
+  overlayBottomViewStyle: {
+    bottom: 100,
+  },
 });
 
 export default styles;

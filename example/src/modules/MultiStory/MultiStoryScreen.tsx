@@ -1,13 +1,20 @@
-import React, { useRef, useState } from 'react';
-import { ImageBackground, View, Text } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  ImageBackground,
+  View,
+  Text,
+  TouchableOpacity,
+  Linking
+} from 'react-native';
 import {
   type MultiStoryRef,
   Indicator,
   MultiStory,
-  TransitionMode
+  TransitionMode,
+  StoryType
 } from 'react-native-story-view';
 import { stories, Strings } from '../../constants';
-import { Header, Footer } from '../../components';
+import { Header, Footer, Overlay } from '../../components';
 import { Colors } from '../../theme';
 import Images from '../../assets';
 import styles from './styles';
@@ -51,6 +58,8 @@ const MultiStoryScreen = () => {
               borderColor: Colors.lightGrey
             }
           }}
+          overlayViewPostion={'top'}
+          renderOverlayView={(item: StoryType) => <Overlay item={item} />}
           storyContainerProps={{
             renderHeaderComponent: ({ userStories }) => (
               <Header {...{ userStories, multiStoryRef }} />

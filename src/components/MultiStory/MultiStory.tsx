@@ -112,6 +112,8 @@ const MultiStory = forwardRef<MultiStoryRef, MultiStoryProps>(
             {...props?.storyContainerProps}
             stories={stories}
             userStoryIndex={pressedIndex}
+            renderOverlayView={props.renderOverlayView}
+            overlayViewPostion={props.overlayViewPostion}
           />
         )}
       </View>
