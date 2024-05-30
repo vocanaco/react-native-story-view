@@ -39,6 +39,12 @@ export enum StoryMode {
   SingleStory = 'SingleStory',
 }
 
+export enum OverlayPositions {
+  Top = 'top',
+  Bottom = 'bottom',
+  Middle = 'middle',
+}
+
 export interface CommonProps {
   images?: Array<string>;
   duration?: number | undefined;
@@ -126,7 +132,7 @@ export interface CallbackProps {
   userStoryIndex?: number | undefined;
 }
 
-export interface StoryContainerProps extends CommonProps {
+export interface StoryContainerBaseProps extends CommonProps {
   extended?: boolean;
   stories: StoryType[];
   userStories?: StoriesType;
@@ -162,7 +168,24 @@ export interface StoryContainerProps extends CommonProps {
   customViewStyle?: ViewStyle;
   headerStyle?: ViewStyle;
   footerStyle?: ViewStyle;
+  renderOverlayView?: (item: StoryType) => JSX.Element;
+  overlayViewPostion?: 'top' | 'bottom' | 'middle';
 }
+
+export interface OverlayViewStoryContainerProps
+  extends StoryContainerBaseProps {
+  renderOverlayView: (item: StoryType) => JSX.Element;
+  overlayViewPostion: 'top' | 'bottom' | 'middle';
+}
+
+export interface StoryContainerMainProps extends StoryContainerBaseProps {
+  renderOverlayView?: never;
+  overlayViewPostion?: never;
+}
+
+export type StoryContainerProps =
+  | OverlayViewStoryContainerProps
+  | StoryContainerMainProps;
 
 export interface UserProps {
   containerStyle?: ViewStyle | undefined;
@@ -202,6 +225,8 @@ export type StoryType = {
   created?: string;
   storyId?: number;
   title?: string;
+  showOverlay?: boolean;
+  link?: string;
 };
 
 export type StoriesType = {

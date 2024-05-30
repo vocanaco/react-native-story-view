@@ -1,12 +1,19 @@
 import React, { useRef, useState } from 'react';
-import { Modal, SafeAreaView, View } from 'react-native';
+import {
+  Linking,
+  Modal,
+  SafeAreaView,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
 import {
   StoryAvatar,
   StoryContainer,
   StoryRef,
   StoryType
 } from 'react-native-story-view';
-import { Footer, Header } from '../../components';
+import { Footer, Header, Overlay } from '../../components';
 import { stories } from '../../constants';
 import styles from './styles';
 
@@ -74,6 +81,8 @@ const StoryScreen = () => {
             )}
             //Callback when status view completes
             onComplete={closeStory}
+            overlayViewPostion={'top'}
+            renderOverlayView={(item: StoryType) => <Overlay item={item} />}
           />
         </SafeAreaView>
       </Modal>

@@ -9,7 +9,7 @@ import Animated from 'react-native-reanimated';
 import { Metrics } from '../../theme';
 import { Footer } from '../Footer';
 import { Indicator, ProfileHeader, StoryContainer } from '../StoryView';
-import type { StoriesType } from '../StoryView/types';
+import { OverlayPositions, type StoriesType } from '../StoryView/types';
 import { useMultiStoryContainer, useMultiStoryItems } from './hooks';
 import styles from './styles';
 import type {
@@ -39,6 +39,8 @@ const MultiStoryListItem = forwardRef<ListItemRef, MultiStoryListItemProps>(
       flatListRef,
       storyLength,
       isInitialStory,
+      renderOverlayView = () => <></>,
+      overlayViewPostion = OverlayPositions.Bottom,
       ...props
     }: MultiStoryListItemProps,
     ref
@@ -79,6 +81,8 @@ const MultiStoryListItem = forwardRef<ListItemRef, MultiStoryListItemProps>(
               stories={item.stories}
               progressIndex={storyInitialIndex < 0 ? 0 : storyInitialIndex}
               maxVideoDuration={15}
+              renderOverlayView={renderOverlayView}
+              overlayViewPostion={overlayViewPostion}
               renderHeaderComponent={() => (
                 <ProfileHeader
                   userImage={{ uri: item.profile ?? '' }}
