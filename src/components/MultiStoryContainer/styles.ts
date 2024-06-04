@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { Colors, Metrics, moderateScale } from '../../theme';
 
 const styles = StyleSheet.create({
@@ -12,12 +12,12 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.transparent,
   },
   mainFlashListContainer: {
-    height: Metrics.windowHeight,
+    height: '100%',
     width: Metrics.windowWidth,
   },
   itemContainer: {
-    height: Metrics.windowHeight,
-    width: Metrics.windowWidth,
+    flex: 1,
+    paddingTop: Platform.OS == 'android' ? moderateScale(30) : 0,
   },
   touchContainer: {
     flex: 1,

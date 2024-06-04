@@ -175,6 +175,7 @@ const MultiStoryContainer = ({
     <Modal
       visible={visible}
       transparent={true}
+      statusBarTranslucent={true}
       onRequestClose={() => onComplete?.()}>
       <GestureHandlerRootView style={styles.rootViewStyle}>
         <GestureDetector gesture={gestureHandler}>
