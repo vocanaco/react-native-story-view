@@ -1,7 +1,11 @@
 import type { ViewToken } from 'react-native';
 import type { SharedValue } from 'react-native-reanimated';
 import type { GestureHandlerEvent } from 'react-native-reanimated/lib/typescript/reanimated2/hook';
-import type { StoriesType, StoryContainerProps } from '../StoryView/types';
+import type {
+  StoriesType,
+  StoryContainerProps,
+  StoryType,
+} from '../StoryView/types';
 
 export enum TransitionMode {
   Default,
@@ -41,6 +45,8 @@ export interface MultiStoryListItemProps
   storyLength: number;
   gestureHandler?: (e: GestureHandlerEvent<any>) => void;
   isInitialStory?: boolean;
+  renderOverlayView?: (item: StoryType) => JSX.Element;
+  overlayViewPostion?: 'top' | 'bottom' | 'middle';
 }
 
 export interface ViewConfig {

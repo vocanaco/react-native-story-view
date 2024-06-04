@@ -2,14 +2,17 @@ import React, {
   forwardRef,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
 } from 'react';
 import {
   KeyboardAvoidingView,
   SafeAreaView,
+  StyleProp,
   TouchableOpacity,
   View,
+  ViewStyle,
 } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { Metrics } from '../../theme';
@@ -19,6 +22,7 @@ import { useStoryContainer } from './hooks';
 import styles from './styles';
 import {
   ClickPosition,
+  OverlayPositions,
   StoryContainerProps,
   StoryMode,
   StoryRef,
@@ -37,6 +41,8 @@ const StoryContainer = forwardRef<StoryRef, StoryContainerProps>(
       footerViewProps,
       progressViewProps,
       storyContainerViewProps,
+      renderOverlayView,
+      overlayViewPostion = OverlayPositions.Bottom,
       ...props
     }: StoryContainerProps,
     ref
@@ -109,6 +115,20 @@ const StoryContainer = forwardRef<StoryRef, StoryContainerProps>(
           : 0
         : 0;
 
+    const overlayViewStyles = useMemo(() => {
+      let style: StyleProp<ViewStyle> = [styles.overlayViewStyle];
+
+      if (overlayViewPostion === OverlayPositions.Middle) {
+        style.push(styles.overlayMiddleViewStyle);
+      } else if (overlayViewPostion === OverlayPositions.Top) {
+        style.push(styles.overlayTopViewStyle);
+      } else if (overlayViewPostion === OverlayPositions.Bottom) {
+        style.push(styles.overlayBottomViewStyle);
+      }
+
+      return style;
+    }, [overlayViewPostion]);
+
     const storyViewContent = () => {
       return (
         <View style={styles.rootViewStyle}>
@@ -131,6 +151,13 @@ const StoryContainer = forwardRef<StoryRef, StoryContainerProps>(
                 }
                 onLongPress={onStoryPressHold}
                 onPressOut={onStoryPressRelease}>
+                {props.stories?.[progressIndex]?.showOverlay && (
+                  <View style={overlayViewStyles}>
+                    {renderOverlayView &&
+                      renderOverlayView(props.stories?.[progressIndex])}
+                  </View>
+                )}
+
                 <StoryView
                   viewRef={viewRef}
                   duration={duration}

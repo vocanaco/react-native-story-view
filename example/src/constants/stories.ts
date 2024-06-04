@@ -13,7 +13,9 @@ const stories = [
         duration: 3,
         isReadMore: true,
         storyId: 1,
-        isSeen: false
+        isSeen: false,
+        showOverlay: true,
+        link: 'https:google.com'
       },
       {
         id: 2,
