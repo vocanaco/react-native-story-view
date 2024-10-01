@@ -10,7 +10,7 @@ import type {
   ViewProps,
   ViewStyle,
 } from 'react-native';
-import type { GestureHandlerEvent } from 'react-native-reanimated/lib/typescript/reanimated2/hook';
+import type { GestureHandlerEvent } from 'react-native-reanimated/lib/typescript/hook';
 import type {
   OnLoadData,
   OnProgressData,
