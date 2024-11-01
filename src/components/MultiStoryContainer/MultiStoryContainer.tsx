@@ -201,7 +201,7 @@ const MultiStoryContainer = ({
               onViewableItemsChanged={onViewRef}
               viewabilityConfig={viewabilityConfig.current}
               keyExtractor={item => item?.title + item?.id?.toString()}
-              extraData={storyIndex}
+              extraData={{ storyIndex, props }}
               renderItem={({ item, index }: ListItemProps) => (
                 <Animated.View
                   style={[styles.mainFlashListContainer, listAnimatedStyle]}>
