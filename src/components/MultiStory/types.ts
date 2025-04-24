@@ -6,6 +6,7 @@ import type {
   StoryContainerProps,
   StoryType,
 } from '../StoryView/types';
+import type React from 'react';
 
 export interface MultiStoryBaseProps extends Partial<FlatListProps<any>> {
   stories: StoriesType[];
@@ -15,12 +16,12 @@ export interface MultiStoryBaseProps extends Partial<FlatListProps<any>> {
   viewedStories?: Array<boolean[]>;
   storyContainerProps?: Omit<StoryContainerProps, 'stories'>;
   transitionMode?: TransitionMode;
-  renderOverlayView?: (item: StoryType) => JSX.Element;
+  renderOverlayView?: (item: StoryType) => React.JSX.Element;
   overlayViewPostion?: 'top' | 'bottom' | 'middle';
 }
 
 export interface OverlayViewMultiStoryProps extends MultiStoryBaseProps {
-  renderOverlayView: (item: StoryType) => JSX.Element;
+  renderOverlayView: (item: StoryType) => React.JSX.Element;
   overlayViewPostion: 'top' | 'bottom' | 'middle';
 }
 

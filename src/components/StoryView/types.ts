@@ -1,3 +1,4 @@
+import type React from 'react';
 import type { RefObject } from 'react';
 import type {
   ActivityIndicatorProps,
@@ -10,11 +11,8 @@ import type {
   ViewProps,
   ViewStyle,
 } from 'react-native';
-import type {
-  OnLoadData,
-  OnProgressData,
-  VideoProperties,
-} from 'react-native-video';
+import type { OnLoadData, OnProgressData } from 'react-native-video';
+import type VideoProperties from 'react-native-video';
 
 export enum StroyTypes {
   Image = 'image',
@@ -103,7 +101,7 @@ export interface StoryViewProps {
   stories: StoryType[];
   showSourceIndicator?: boolean;
   sourceIndicatorProps?: ActivityIndicatorProps;
-  videoProps?: VideoProperties;
+  videoProps?: typeof VideoProperties;
   index?: number;
   storyIndex?: number;
 }
@@ -141,13 +139,13 @@ export interface StoryContainerBaseProps extends CommonProps {
   userStoryIndex?: number | undefined;
   storyIndex?: number | undefined;
   isShowReply?: boolean | undefined;
-  renderHeaderComponent?: (callback: CallbackProps) => JSX.Element;
-  renderFooterComponent?: (callback: CallbackProps) => JSX.Element;
-  renderIndicatorComponent?: () => JSX.Element;
+  renderHeaderComponent?: (callback: CallbackProps) => React.JSX.Element;
+  renderFooterComponent?: (callback: CallbackProps) => React.JSX.Element;
+  renderIndicatorComponent?: () => React.JSX.Element;
   userProfile?: UserProps | undefined;
   footerView?: FooterViewProps | undefined;
   onComplete?: (viewedStories?: Array<boolean[]>) => void;
-  renderCustomView?: (callback: CallbackProps) => JSX.Element;
+  renderCustomView?: (callback: CallbackProps) => React.JSX.Element;
   backgroundColor?: string;
   style?: ViewStyle;
   progressIndex?: number | undefined;
@@ -158,7 +156,7 @@ export interface StoryContainerBaseProps extends CommonProps {
   storyContainerViewProps?: ViewProps;
   showSourceIndicator?: boolean;
   sourceIndicatorProps?: ActivityIndicatorProps;
-  videoProps?: VideoProperties;
+  videoProps?: typeof VideoProperties;
   onChangePosition?: (
     progressIndex: number,
     userStoryIndex?: number
@@ -168,13 +166,13 @@ export interface StoryContainerBaseProps extends CommonProps {
   customViewStyle?: ViewStyle;
   headerStyle?: ViewStyle;
   footerStyle?: ViewStyle;
-  renderOverlayView?: (item: StoryType) => JSX.Element;
+  renderOverlayView?: (item: StoryType) => React.JSX.Element;
   overlayViewPostion?: 'top' | 'bottom' | 'middle';
 }
 
 export interface OverlayViewStoryContainerProps
   extends StoryContainerBaseProps {
-  renderOverlayView: (item: StoryType) => JSX.Element;
+  renderOverlayView: (item: StoryType) => React.JSX.Element;
   overlayViewPostion: 'top' | 'bottom' | 'middle';
 }
 

@@ -6,6 +6,7 @@ import type {
   StoryContainerProps,
   StoryType,
 } from '../StoryView/types';
+import type React from 'react';
 
 export enum TransitionMode {
   Default,
@@ -45,7 +46,7 @@ export interface MultiStoryListItemProps
   storyLength: number;
   gestureHandler?: (e: GestureHandlerEvent<any>) => void;
   isInitialStory?: boolean;
-  renderOverlayView?: (item: StoryType) => JSX.Element;
+  renderOverlayView?: (item: StoryType) => React.JSX.Element;
   overlayViewPostion?: 'top' | 'bottom' | 'middle';
 }
 

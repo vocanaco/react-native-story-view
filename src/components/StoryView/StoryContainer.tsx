@@ -116,7 +116,7 @@ const StoryContainer = forwardRef<StoryRef, StoryContainerProps>(
         : 0;
 
     const overlayViewStyles = useMemo(() => {
-      let style: StyleProp<ViewStyle> = [styles.overlayViewStyle];
+      const style: StyleProp<ViewStyle> = [styles.overlayViewStyle];
 
       if (overlayViewPostion === OverlayPositions.Middle) {
         style.push(styles.overlayMiddleViewStyle);
@@ -159,6 +159,8 @@ const StoryContainer = forwardRef<StoryRef, StoryContainerProps>(
                 )}
 
                 <StoryView
+                  /*
+                  // @ts-ignore */
                   viewRef={viewRef}
                   duration={duration}
                   onVideoLoaded={onVideoLoaded}

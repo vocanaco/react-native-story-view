@@ -1,18 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, useWindowDimensions, View } from 'react-native';
-import Video, { OnBufferData, OnLoadData } from 'react-native-video';
+import Video, { OnBufferData, OnLoadData, VideoRef } from 'react-native-video';
 import { Colors, Metrics } from '../../theme';
 import ProgressiveImage from './ProgressiveImage';
 import styles from './styles';
 import { StoryViewProps, StroyTypes } from './types';
 
-const BUFFER_TIME = 1000 * 60;
+const BUFFER_TIME = 1000 * 10;
 
 const StoryView = (props: StoryViewProps) => {
   const [loading, setLoading] = useState(true);
   const [buffering, setBuffering] = useState(true);
   const source = props?.stories?.[props?.progressIndex];
-  const videoRef = useRef<Video>(null);
+  const videoRef = useRef<VideoRef>(null);
+  // @ts-ignore
   const videoData = useRef<OnLoadData>();
   const isCurrentIndex = props?.index === props?.storyIndex;
 
@@ -57,20 +58,24 @@ const StoryView = (props: StoryViewProps) => {
               ref={videoRef}
               resizeMode="contain"
               paused={props.pause || loading}
-              source={{ uri: source?.url! }}
+              source={{
+                uri: source?.url!,
+                bufferConfig: {
+                  minBufferMs: BUFFER_TIME,
+                  bufferForPlaybackMs: BUFFER_TIME,
+                  bufferForPlaybackAfterRebufferMs: BUFFER_TIME,
+                },
+              }}
               onEnd={props?.onVideoEnd}
               onError={(_error: any) => {
+                // eslint-disable-next-line no-console
+                console.log(`VIDEO ERROR: ${JSON.stringify(_error)}`);
                 setLoading(false);
               }}
               onProgress={data => {
                 if (isCurrentIndex) {
                   props?.onVideoProgress?.(data);
                 }
-              }}
-              bufferConfig={{
-                minBufferMs: BUFFER_TIME,
-                bufferForPlaybackMs: BUFFER_TIME,
-                bufferForPlaybackAfterRebufferMs: BUFFER_TIME,
               }}
               onBuffer={onBuffer}
               onLoadStart={onLoadStart}
