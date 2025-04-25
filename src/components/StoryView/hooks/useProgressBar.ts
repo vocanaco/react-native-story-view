@@ -90,8 +90,8 @@ const useProgressBar = ({
           const videoProgress: number =
             (width * videoDuration[currentIndex]) / duration;
           if (videoDuration[currentIndex] >= duration) {
-            props?.next && props?.next();
             props?.setVideoDuration(Array(props?.length).fill(0));
+            props?.next && props?.next();
             return;
           }
           return scale.setValue(videoProgress);
