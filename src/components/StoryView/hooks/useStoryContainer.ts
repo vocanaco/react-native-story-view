@@ -121,8 +121,8 @@ const useStoryContainer = (
     setPause(false);
     setDuration(
       props?.stories?.[progressIndex]?.duration ??
-        props?.maxVideoDuration ??
-        length?.duration
+        length?.duration ??
+        props?.maxVideoDuration
     );
   };
 
