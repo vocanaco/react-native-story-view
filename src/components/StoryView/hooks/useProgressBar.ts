@@ -20,26 +20,6 @@ const useProgressBar = ({
   const [remainingTime, setRemainingTime] = useState<number>(duration);
   const isVideoStory = useRef(storyType === StroyTypes.Video);
 
-  function debounce<T extends Function>(cb: T, wait = 100) {
-    let h: NodeJS.Timeout;
-    const callable = (...args: any) => {
-      clearTimeout(h);
-      h = setTimeout(() => cb(...args), wait);
-    };
-    return <T>(<any>callable);
-  }
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const nextStory = useCallback(
-    debounce(() => {
-      // eslint-disable-next-line no-console
-      console.log(`NEXT VIDEO`);
-      props?.setVideoDuration(Array(props?.length).fill(0));
-      props?.next && props?.next();
-    }),
-    []
-  );
-
   // Restart ProgressBar when story changes
   useEffect(() => {
     if (index === currentIndex) {
@@ -84,7 +64,7 @@ const useProgressBar = ({
             easing: Easing.linear,
             useNativeDriver: false,
           }).start(({ finished }) => {
-            if (finished) nextStory();
+            if (finished) props?.next && props?.next();
           });
         else {
           return scale.setValue(0);
@@ -98,7 +78,7 @@ const useProgressBar = ({
       default:
         return scale.setValue(0);
     }
-  }, [active, isVideoStory, getDuration, props, scale, width, nextStory]);
+  }, [active, isVideoStory, getDuration, props, scale, width]);
 
   useEffect(() => {
     if (!isVideoStory.current) return;
@@ -114,7 +94,10 @@ const useProgressBar = ({
             `videoProgress: ${videoProgress}, width: ${width}, duration: ${duration}, videoDuration: ${videoDuration[currentIndex]}`
           );
           if (videoDuration[currentIndex] >= duration) {
-            nextStory();
+            // eslint-disable-next-line no-console
+            console.log(`NEXT VIDEO`);
+            props?.setVideoDuration(Array(props?.length).fill(0));
+            props?.next && props?.next();
             return;
           }
           return scale.setValue(videoProgress);
@@ -141,7 +124,6 @@ const useProgressBar = ({
     props,
     scale,
     width,
-    nextStory,
   ]);
 
   return {
