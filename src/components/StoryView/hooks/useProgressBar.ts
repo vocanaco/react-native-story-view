@@ -19,6 +19,7 @@ const useProgressBar = ({
   const [width, setWidth] = useState<number>(0);
   const [remainingTime, setRemainingTime] = useState<number>(duration);
   const isVideoStory = useRef(storyType === StroyTypes.Video);
+  const isLoadingNextStory = useRef(false);
 
   // Restart ProgressBar when story changes
   useEffect(() => {
@@ -82,6 +83,12 @@ const useProgressBar = ({
 
   useEffect(() => {
     if (!isVideoStory.current) return;
+    if (isLoadingNextStory.current) {
+      if (videoDuration[currentIndex] < duration) {
+        isLoadingNextStory.current = false;
+      }
+      return;
+    }
     switch (active) {
       case ProgressState.Default:
         return scale.setValue(0);
@@ -94,10 +101,13 @@ const useProgressBar = ({
             `videoProgress: ${videoProgress}, width: ${width}, duration: ${duration}, videoDuration: ${videoDuration[currentIndex]}`
           );
           if (videoDuration[currentIndex] >= duration) {
-            // eslint-disable-next-line no-console
-            console.log(`NEXT VIDEO`);
-            props?.setVideoDuration(Array(props?.length).fill(0));
-            props?.next && props?.next();
+            if (!isLoadingNextStory.current) {
+              isLoadingNextStory.current = true;
+              // eslint-disable-next-line no-console
+              console.log(`NEXT VIDEO`);
+              props?.next && props?.next();
+              props?.setVideoDuration(Array(props?.length).fill(0));
+            }
             return;
           }
           return scale.setValue(videoProgress);
