@@ -98,9 +98,10 @@ const StoryContainer = forwardRef<StoryRef, StoryContainerProps>(
 
     useEffect(() => {
       setLoaded(false);
-      setDuration(
-        props.stories?.[progressIndex]?.duration ?? Metrics.defaultDuration
-      );
+      if (props.stories?.[progressIndex]?.duration) {
+        // @ts-ignore
+        setDuration(props.stories?.[progressIndex]?.duration);
+      }
     }, [progressIndex, props.stories, setDuration, setLoaded]);
 
     const storyMode: StoryMode =
