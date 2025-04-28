@@ -19,7 +19,26 @@ const useProgressBar = ({
   const [width, setWidth] = useState<number>(0);
   const [remainingTime, setRemainingTime] = useState<number>(duration);
   const isVideoStory = useRef(storyType === StroyTypes.Video);
-  const isLoadingNextStory = useRef(false);
+
+  function debounce<T extends Function>(cb: T, wait = 100) {
+    let h: NodeJS.Timeout;
+    const callable = (...args: any) => {
+      clearTimeout(h);
+      h = setTimeout(() => cb(...args), wait);
+    };
+    return <T>(<any>callable);
+  }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const nextStory = useCallback(
+    debounce(() => {
+      // eslint-disable-next-line no-console
+      console.log(`NEXT VIDEO`);
+      props?.setVideoDuration(Array(props?.length).fill(0));
+      props?.next && props?.next();
+    }),
+    []
+  );
 
   // Restart ProgressBar when story changes
   useEffect(() => {
@@ -65,7 +84,7 @@ const useProgressBar = ({
             easing: Easing.linear,
             useNativeDriver: false,
           }).start(({ finished }) => {
-            if (finished) props?.next && props?.next();
+            if (finished) nextStory();
           });
         else {
           return scale.setValue(0);
@@ -79,16 +98,10 @@ const useProgressBar = ({
       default:
         return scale.setValue(0);
     }
-  }, [active, isVideoStory, getDuration, props, scale, width]);
+  }, [active, isVideoStory, getDuration, props, scale, width, nextStory]);
 
   useEffect(() => {
     if (!isVideoStory.current) return;
-    if (isLoadingNextStory.current) {
-      if (videoDuration[currentIndex] < duration) {
-        isLoadingNextStory.current = false;
-      }
-      return;
-    }
     switch (active) {
       case ProgressState.Default:
         return scale.setValue(0);
@@ -101,13 +114,7 @@ const useProgressBar = ({
             `videoProgress: ${videoProgress}, width: ${width}, duration: ${duration}, videoDuration: ${videoDuration[currentIndex]}`
           );
           if (videoDuration[currentIndex] >= duration) {
-            if (!isLoadingNextStory.current) {
-              isLoadingNextStory.current = true;
-              // eslint-disable-next-line no-console
-              console.log(`NEXT VIDEO`);
-              props?.next && props?.next();
-              props?.setVideoDuration(Array(props?.length).fill(0));
-            }
+            nextStory();
             return;
           }
           return scale.setValue(videoProgress);
@@ -134,6 +141,7 @@ const useProgressBar = ({
     props,
     scale,
     width,
+    nextStory,
   ]);
 
   return {
