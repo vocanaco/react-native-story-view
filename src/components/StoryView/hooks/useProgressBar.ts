@@ -63,7 +63,9 @@ const useProgressBar = ({
             duration: getDuration(),
             easing: Easing.linear,
             useNativeDriver: false,
-          }).start();
+          }).start(({ finished }) => {
+            if (finished) props?.next && props?.next();
+          });
         else {
           return scale.setValue(0);
         }
