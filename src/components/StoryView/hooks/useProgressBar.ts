@@ -63,9 +63,7 @@ const useProgressBar = ({
             duration: getDuration(),
             easing: Easing.linear,
             useNativeDriver: false,
-          }).start(({ finished }) => {
-            if (finished) props?.next && props?.next();
-          });
+          }).start();
         else {
           return scale.setValue(0);
         }
@@ -94,10 +92,7 @@ const useProgressBar = ({
             `videoProgress: ${videoProgress}, width: ${width}, duration: ${duration}, videoDuration: ${videoDuration[currentIndex]}`
           );
           if (videoDuration[currentIndex] >= duration) {
-            // eslint-disable-next-line no-console
-            console.log(`NEXT VIDEO`);
             props?.setVideoDuration(Array(props?.length).fill(0));
-            props?.next && props?.next();
             return;
           }
           return scale.setValue(videoProgress);

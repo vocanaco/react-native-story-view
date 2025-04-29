@@ -131,7 +131,7 @@ const useStoryContainer = (
       const videoDurations = [...videoDuration];
       videoDurations[progressIndex] = duration + 1;
       setVideoDuration([...videoDurations]);
-      return;
+      onArrowClick(ClickPosition.Right);
     }
   };
 
