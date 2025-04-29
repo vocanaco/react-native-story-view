@@ -1,6 +1,6 @@
 {
   "name": "@vocana/react-native-story-view",
-  "version": "2.0.11",
+  "version": "2.0.12",
   "description": "React Native component to provide status/stories feature.",
   "main": "lib/index",
   "types": "lib/index.d.ts",
