@@ -128,6 +128,10 @@ const useStoryContainer = (
 
   const onVideoEnd = () => {
     if (props?.index === props?.userStoryIndex) {
+      // eslint-disable-next-line no-console
+      console.log(
+        `VIDEO ENDED. progressIndex: ${progressIndex}, props.index: ${props?.index}, props.userStoryIndex: ${props?.userStoryIndex}`
+      );
       setVideoDuration(Array(storyCount).fill(0));
       onArrowClick(ClickPosition.Right);
     }

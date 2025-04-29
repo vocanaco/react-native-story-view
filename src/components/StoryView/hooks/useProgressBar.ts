@@ -89,6 +89,10 @@ const useProgressBar = ({
         if (props?.isLoaded) {
           const videoProgress: number =
             (width * videoDuration[currentIndex]) / duration;
+          // eslint-disable-next-line no-console
+          console.log(
+            `videoProgress: ${videoProgress}, width: ${width}, duration: ${duration}, videoDuration: ${videoDuration[currentIndex]}`
+          );
           if (videoDuration[currentIndex] >= duration) {
             return;
           }
