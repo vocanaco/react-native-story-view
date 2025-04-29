@@ -98,7 +98,10 @@ const useProgressBar = ({
             console.log(
               `videoProgress: ${videoProgress}, width: ${width}, duration: ${duration}, videoDuration: ${videoDuration[currentIndex]}`
             );
-            if (videoDuration[currentIndex] < duration) {
+            if (
+              videoDuration[currentIndex] < duration &&
+              index === currentIndex
+            ) {
               scale.setValue(videoProgress);
             }
           } else {
