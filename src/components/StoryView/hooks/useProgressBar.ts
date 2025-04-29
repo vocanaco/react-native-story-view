@@ -84,6 +84,13 @@ const useProgressBar = ({
     }
   }, [active, isVideoStory, getDuration, props, scale, width]);
 
+  const logWithTimestamps = (message: string) => {
+    const now = new Date();
+    const timestamp = now.toLocaleString();
+    // eslint-disable-next-line no-console
+    console.log(`[${timestamp}] ${message}`);
+  };
+
   useEffect(() => {
     if (isVideoStory.current) {
       switch (active) {
@@ -94,9 +101,8 @@ const useProgressBar = ({
           if (props?.isLoaded) {
             const videoProgress: number =
               (width * videoDuration[currentIndex]) / duration;
-            // eslint-disable-next-line no-console
-            console.log(
-              `videoProgress: ${videoProgress}, width: ${width}, duration: ${duration}, videoDuration: ${videoDuration[currentIndex]}`
+            logWithTimestamps(
+              `InProgress - index: ${index}, currentIndex: ${currentIndex}, width: ${width}, duration: ${duration}, videoDuration: ${videoDuration[currentIndex]}`
             );
             if (
               videoDuration[currentIndex] < duration &&
@@ -109,6 +115,9 @@ const useProgressBar = ({
           }
           break;
         case ProgressState.Completed:
+          logWithTimestamps(
+            `Completed - index: ${index}, currentIndex: ${currentIndex}, width: ${width}, duration: ${duration}, videoDuration: ${videoDuration[currentIndex]}`
+          );
           scale.setValue(width);
           break;
         case ProgressState.Paused:
