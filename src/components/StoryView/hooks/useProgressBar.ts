@@ -20,7 +20,7 @@ const useProgressBar = ({
   const [remainingTime, setRemainingTime] = useState<number>(duration);
   const isVideoStory = useRef(storyType === StroyTypes.Video);
 
-  // Restart ProgressBar when story changes
+  // Restart ProgressBar when the story changes
   useEffect(() => {
     if (index === currentIndex) {
       scale.setValue(0);
@@ -29,10 +29,11 @@ const useProgressBar = ({
   }, [storyIndex, currentIndex, index, scale, duration, setRemainingTime]);
 
   useEffect(() => {
-    if (isVideoStory.current) return;
-    const progressBarWidth =
-      Number.parseInt(JSON.stringify(scaleRef.current), 10) ?? 0;
-    setRemainingTime(duration - (progressBarWidth * duration) / width);
+    if (!isVideoStory.current) {
+      const progressBarWidth =
+        Number.parseInt(JSON.stringify(scaleRef.current), 10) ?? 0;
+      setRemainingTime(duration - (progressBarWidth * duration) / width);
+    }
   }, [props?.pause, width, duration]);
 
   const barActiveColor = props?.barStyle?.barActiveColor ?? Colors.activeColor;
@@ -52,63 +53,67 @@ const useProgressBar = ({
   }, [remainingTime, scale, props?.pause, duration]);
 
   useEffect(() => {
-    if (isVideoStory.current) return;
-    switch (active) {
-      case ProgressState.Default:
-        return scale.setValue(0);
-      case ProgressState.InProgress:
-        if (props.isLoaded)
-          return Animated.timing(scale, {
-            toValue: width,
-            duration: getDuration(),
-            easing: Easing.linear,
-            useNativeDriver: false,
-          }).start(({ finished }) => {
-            if (finished) props?.next && props?.next();
-          });
-        else {
-          return scale.setValue(0);
-        }
-      case ProgressState.Completed:
-        return scale.setValue(width);
-      case ProgressState.Paused:
-        return scale.setValue(
-          Number.parseInt(JSON.stringify(scaleRef.current), 10)
-        );
-      default:
-        return scale.setValue(0);
+    if (!isVideoStory.current) {
+      switch (active) {
+        case ProgressState.Default:
+          scale.setValue(0);
+          break;
+        case ProgressState.InProgress:
+          if (props.isLoaded)
+            Animated.timing(scale, {
+              toValue: width,
+              duration: getDuration(),
+              easing: Easing.linear,
+              useNativeDriver: false,
+            }).start(({ finished }) => {
+              if (finished) props?.next && props?.next();
+            });
+          else {
+            scale.setValue(0);
+          }
+          break;
+        case ProgressState.Completed:
+          scale.setValue(width);
+          break;
+        case ProgressState.Paused:
+          scale.setValue(Number.parseInt(JSON.stringify(scaleRef.current), 10));
+          break;
+        default:
+          scale.setValue(0);
+      }
     }
   }, [active, isVideoStory, getDuration, props, scale, width]);
 
   useEffect(() => {
-    if (!isVideoStory.current) return;
-    switch (active) {
-      case ProgressState.Default:
-        return scale.setValue(0);
-      case ProgressState.InProgress: {
-        if (props?.isLoaded) {
-          const videoProgress: number =
-            (width * videoDuration[currentIndex]) / duration;
-          // eslint-disable-next-line no-console
-          console.log(
-            `videoProgress: ${videoProgress}, width: ${width}, duration: ${duration}, videoDuration: ${videoDuration[currentIndex]}`
-          );
-          if (videoDuration[currentIndex] >= duration) {
-            return;
+    if (isVideoStory.current) {
+      switch (active) {
+        case ProgressState.Default:
+          scale.setValue(0);
+          break;
+        case ProgressState.InProgress:
+          if (props?.isLoaded) {
+            const videoProgress: number =
+              (width * videoDuration[currentIndex]) / duration;
+            // eslint-disable-next-line no-console
+            console.log(
+              `videoProgress: ${videoProgress}, width: ${width}, duration: ${duration}, videoDuration: ${videoDuration[currentIndex]}`
+            );
+            if (videoDuration[currentIndex] < duration) {
+              scale.setValue(videoProgress);
+            }
+          } else {
+            scale.setValue(0);
           }
-          return scale.setValue(videoProgress);
-        } else {
-          return scale.setValue(0);
-        }
+          break;
+        case ProgressState.Completed:
+          scale.setValue(width);
+          break;
+        case ProgressState.Paused:
+          scale.setValue(Number.parseInt(JSON.stringify(scaleRef.current), 10));
+          break;
+        default:
+          scale.setValue(0);
       }
-      case ProgressState.Completed:
-        return scale.setValue(width);
-      case ProgressState.Paused:
-        return scale.setValue(
-          Number.parseInt(JSON.stringify(scaleRef.current), 10)
-        );
-      default:
-        return scale.setValue(0);
     }
   }, [
     index,
