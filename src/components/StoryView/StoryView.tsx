@@ -80,8 +80,6 @@ const StoryView = (props: StoryViewProps) => {
               onBuffer={onBuffer}
               onLoadStart={onLoadStart}
               onLoad={(item: OnLoadData) => {
-                // eslint-disable-next-line no-console
-                console.log(`VIDEO DURATION: ${item.duration}`);
                 videoData.current = item;
                 !Metrics.isIOS && loadVideo();
               }}

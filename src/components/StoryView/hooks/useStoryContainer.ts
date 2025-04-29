@@ -128,9 +128,7 @@ const useStoryContainer = (
 
   const onVideoEnd = () => {
     if (props?.index === props?.userStoryIndex) {
-      const videoDurations = [...videoDuration];
-      videoDurations[progressIndex] = duration + 1;
-      setVideoDuration([...videoDurations]);
+      setVideoDuration(Array(storyCount).fill(0));
       onArrowClick(ClickPosition.Right);
     }
   };
