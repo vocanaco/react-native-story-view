@@ -19,6 +19,8 @@ const useProgressBar = ({
   const [width, setWidth] = useState<number>(0);
   const [remainingTime, setRemainingTime] = useState<number>(duration);
   const isVideoStory = useRef(storyType === StroyTypes.Video);
+  // this variable will help when identifying an exception scenario for iOS
+  const previousVideoDurationRef = useRef(Array(props?.length).fill(0));
 
   // Restart ProgressBar when the story changes
   useEffect(() => {
@@ -99,16 +101,31 @@ const useProgressBar = ({
           break;
         case ProgressState.InProgress:
           if (props?.isLoaded) {
+            const currentStoryDurationPlayed = videoDuration[currentIndex];
+            if (
+              currentStoryDurationPlayed > 0 &&
+              currentIndex > 0 &&
+              Math.abs(
+                currentStoryDurationPlayed -
+                  previousVideoDurationRef.current[currentIndex - 1]
+              ) < Number.EPSILON
+            ) {
+              logWithTimestamps(
+                `STALE DATA - index: ${index}, currentIndex: ${currentIndex}, width: ${width}, duration: ${duration}, videoDuration: ${currentStoryDurationPlayed}`
+              );
+              break;
+            }
             const videoProgress: number =
-              (width * videoDuration[currentIndex]) / duration;
+              (width * currentStoryDurationPlayed) / duration;
             logWithTimestamps(
-              `InProgress - index: ${index}, currentIndex: ${currentIndex}, width: ${width}, duration: ${duration}, videoDuration: ${videoDuration[currentIndex]}`
+              `InProgress - index: ${index}, currentIndex: ${currentIndex}, width: ${width}, duration: ${duration}, videoDuration: ${currentStoryDurationPlayed}`
             );
             if (
               videoDuration[currentIndex] < duration &&
               index === currentIndex
             ) {
               scale.setValue(videoProgress);
+              previousVideoDurationRef.current = videoDuration.slice();
             }
           } else {
             scale.setValue(0);
