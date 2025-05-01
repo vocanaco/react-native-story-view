@@ -86,13 +86,6 @@ const useProgressBar = ({
     }
   }, [active, isVideoStory, getDuration, props, scale, width]);
 
-  const logWithTimestamps = (message: string) => {
-    const now = new Date();
-    const timestamp = now.toLocaleString();
-    // eslint-disable-next-line no-console
-    console.log(`[${timestamp}] ${message}`);
-  };
-
   useEffect(() => {
     const currentStoryDurationPlayed = videoDuration[currentIndex];
     const isStaleData =
@@ -107,16 +100,10 @@ const useProgressBar = ({
         case ProgressState.InProgress:
           if (props?.isLoaded) {
             if (isStaleData) {
-              logWithTimestamps(
-                `STALE DATA InProgress - index: ${index}, currentIndex: ${currentIndex}, width: ${width}, duration: ${duration}, videoDuration: ${currentStoryDurationPlayed}`
-              );
               break;
             }
             const videoProgress: number =
               (width * currentStoryDurationPlayed) / duration;
-            logWithTimestamps(
-              `InProgress - index: ${index}, currentIndex: ${currentIndex}, width: ${width}, duration: ${duration}, videoDuration: ${currentStoryDurationPlayed}`
-            );
             if (
               videoDuration[currentIndex] < duration &&
               index === currentIndex
@@ -130,14 +117,8 @@ const useProgressBar = ({
           break;
         case ProgressState.Completed:
           if (isStaleData) {
-            logWithTimestamps(
-              `STALE DATA Completed - index: ${index}, currentIndex: ${currentIndex}, width: ${width}, duration: ${duration}, videoDuration: ${currentStoryDurationPlayed}`
-            );
             break;
           }
-          logWithTimestamps(
-            `Completed - index: ${index}, currentIndex: ${currentIndex}, width: ${width}, duration: ${duration}, videoDuration: ${currentStoryDurationPlayed}`
-          );
           previousVideoDurationRef.current = currentStoryDurationPlayed;
           scale.setValue(width);
           break;
