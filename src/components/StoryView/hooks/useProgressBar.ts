@@ -20,7 +20,7 @@ const useProgressBar = ({
   const [remainingTime, setRemainingTime] = useState<number>(duration);
   const isVideoStory = useRef(storyType === StroyTypes.Video);
   // this variable will help when identifying an exception scenario for iOS
-  const previousVideoDurationRef = useRef(Array(props?.length).fill(0));
+  const previousVideoDurationRef = useRef(0);
 
   // Restart ProgressBar when the story changes
   useEffect(() => {
@@ -94,6 +94,11 @@ const useProgressBar = ({
   };
 
   useEffect(() => {
+    const currentStoryDurationPlayed = videoDuration[currentIndex];
+    const isStaleData =
+      currentStoryDurationPlayed > 0 &&
+      currentIndex > 0 &&
+      currentStoryDurationPlayed - previousVideoDurationRef.current > 0.5;
     if (isVideoStory.current) {
       switch (active) {
         case ProgressState.Default:
@@ -101,17 +106,9 @@ const useProgressBar = ({
           break;
         case ProgressState.InProgress:
           if (props?.isLoaded) {
-            const currentStoryDurationPlayed = videoDuration[currentIndex];
-            if (
-              currentStoryDurationPlayed > 0 &&
-              currentIndex > 0 &&
-              Math.abs(
-                currentStoryDurationPlayed -
-                  previousVideoDurationRef.current[currentIndex - 1]
-              ) < Number.EPSILON
-            ) {
+            if (isStaleData) {
               logWithTimestamps(
-                `STALE DATA - index: ${index}, currentIndex: ${currentIndex}, width: ${width}, duration: ${duration}, videoDuration: ${currentStoryDurationPlayed}`
+                `STALE DATA InProgress - index: ${index}, currentIndex: ${currentIndex}, width: ${width}, duration: ${duration}, videoDuration: ${currentStoryDurationPlayed}`
               );
               break;
             }
@@ -125,16 +122,23 @@ const useProgressBar = ({
               index === currentIndex
             ) {
               scale.setValue(videoProgress);
-              previousVideoDurationRef.current = videoDuration.slice();
+              previousVideoDurationRef.current = currentStoryDurationPlayed;
             }
           } else {
             scale.setValue(0);
           }
           break;
         case ProgressState.Completed:
+          if (isStaleData) {
+            logWithTimestamps(
+              `STALE DATA Completed - index: ${index}, currentIndex: ${currentIndex}, width: ${width}, duration: ${duration}, videoDuration: ${currentStoryDurationPlayed}`
+            );
+            break;
+          }
           logWithTimestamps(
-            `Completed - index: ${index}, currentIndex: ${currentIndex}, width: ${width}, duration: ${duration}, videoDuration: ${videoDuration[currentIndex]}`
+            `Completed - index: ${index}, currentIndex: ${currentIndex}, width: ${width}, duration: ${duration}, videoDuration: ${currentStoryDurationPlayed}`
           );
+          previousVideoDurationRef.current = currentStoryDurationPlayed;
           scale.setValue(width);
           break;
         case ProgressState.Paused:
